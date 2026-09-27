@@ -121,6 +121,42 @@ descontinuada na versão da API), o script registra o erro no JSON e segue.
 
 `--json-in arquivo.json` reprocessa um JSON já baixado sem chamar a API.
 
+### Posts públicos de concorrentes (Business Discovery)
+
+```bash
+python3 scripts/stories_api.py --discovery perfumariaxyz --out ./concorrente_xyz
+```
+
+Endpoint: `GET /{ig-user-id-da-kindo}?fields=business_discovery.username(<usuario>){username,name,followers_count,media_count,biography,media.limit(25){id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,like_count,comments_count}}`.
+
+Só funciona para contas Business ou Creator públicas; conta pessoal
+devolve erro "(#110) ... not a business account" e aí só restam os prints.
+Não inclui stories, nem de contas públicas: a API da Meta só expõe stories
+da própria conta autenticada.
+
+Saída: `<out>/discovery.json` e a mídia baixada. Resuma os posts com o
+mesmo formato de card a card, trocando "views" por curtidas e comentários.
+
+### Serviços externos de coleta de stories
+
+Existem serviços pagos (Apify "Instagram Story Scraper" e similares) que
+entregam stories de contas públicas via API. Eles funcionam por scraping,
+o que a Meta proíbe nos termos de uso e combate judicialmente; a conta
+que paga o serviço não é a que corre risco, mas a coleta pode parar sem
+aviso. Use somente se Julio contratar por conta própria e pedir
+explicitamente; nesse caso ele fornece o token e a URL do dataset, e o
+resultado entra pelo `--json-in` depois de convertido para o formato do
+`stories.json` (campos `id`, `media_type`, `media_url`, `timestamp`,
+`caption`). Não cadastre nem acione esses serviços por iniciativa própria.
+
+## Teste feito em 27/09/2026
+
+Sem login, deste ambiente: `instagram.com/<conta>/` redireciona para
+login (302), `instagram.com/stories/<conta>/` devolve a página de login,
+`api/v1/users/web_profile_info` devolve 401 e `i.instagram.com/api/v1/feed/reels_media`
+devolve 400. Vale para contas públicas também. Não adianta tentar de novo
+com outro user-agent.
+
 ## O que não fazer
 
 - Não acessar `instagram.com/stories/<conta>/` por curl ou navegador

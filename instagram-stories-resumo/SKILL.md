@@ -1,6 +1,6 @@
 ---
 name: instagram-stories-resumo
-description: Vê os stories de uma conta do Instagram e entrega um resumo objetivo do que foi postado — ordem dos cards, produtos e preços, textos na tela, enquetes, links e CTAs, e as métricas de visualização quando a conta é da Kindo. Funciona a partir de prints ou gravação de tela enviados por Julio (qualquer conta, inclusive concorrentes) ou puxando os stories da @kindoperfumaria via Windsor.ai, conector Meta ou API do Instagram. Use sempre que Julio mandar prints de stories, pedir "resume os stories", "o que a loja X postou hoje", "como foram meus stories", "qual story teve mais visualização", ou quiser saber o que uma conta está publicando nos stories — mesmo sem usar a palavra "resumo".
+description: Vê os stories de uma conta do Instagram — a @kindoperfumaria ou concorrentes com conta pública — e entrega um resumo objetivo do que foi postado — ordem dos cards, produtos e preços, textos na tela, enquetes, links e CTAs, e as métricas de visualização quando a conta é da Kindo. Funciona a partir de prints ou gravação de tela enviados por Julio (qualquer conta), puxando os stories da @kindoperfumaria via Windsor.ai, conector Meta ou API do Instagram, e consultando os posts públicos de concorrentes pela API oficial. Use sempre que Julio mandar prints de stories, pedir "resume os stories", "o que a loja X postou hoje", "vê o instagram da concorrente", "como foram meus stories", "qual story teve mais visualização", ou quiser saber o que uma conta está publicando — mesmo sem usar a palavra "resumo".
 ---
 
 # Resumo de stories do Instagram
@@ -41,6 +41,26 @@ Detalhes de campos, chamadas e limites de cada canal estão em
 Não faça scraping de instagram.com, não use "visualizadores anônimos de
 stories" e nunca peça a senha do Instagram de Julio. Além de violarem os
 termos da plataforma, esses caminhos derrubam a conta da loja.
+
+### Concorrentes com conta pública
+
+Julio acompanha o que as perfumarias concorrentes postam. Conta pública
+não muda o acesso: o Instagram exige login até para abrir o perfil, e
+nenhum dos canais 2 a 4 devolve stories de terceiros. O que funciona:
+
+- **Stories**: prints ou gravação de tela feitos por Julio no celular
+  (canal 1). É o mesmo que qualquer seguidor vê; não há API para isso.
+- **Posts e reels do feed**: `scripts/stories_api.py --discovery <usuario>`
+  usa a Business Discovery da API oficial e traz os últimos posts da conta
+  pública com legenda, tipo, data, curtidas e comentários, mais número de
+  seguidores. Exige `IG_ACCESS_TOKEN` da Kindo. Serve para "o que a loja X
+  está anunciando", mesmo sem os stories.
+- **Serviço externo de coleta de stories** (Apify e similares): só se Julio
+  contratar e pedir; veja o aviso em `references/canais.md`.
+
+Ao resumir concorrente, o foco muda: preços comparáveis ao mix da Kindo,
+mecânica da promoção (cupom, brinde, parcelamento, prazo), frequência de
+postagem e o que pode ser replicado. Não precisa de métricas.
 
 ### Quando nenhum canal responde
 

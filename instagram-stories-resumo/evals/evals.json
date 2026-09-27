@@ -58,6 +58,27 @@
         "Enquete com resultado 44% Malbec Gold e 56% Essencial Oud",
         "Card a card em lista numerada, em português"
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "da uma olhada nos stories da perfumaria do bairro que eu printei, o que eles tao fazendo de promoção essa semana?",
+      "expected_output": "Resumo card a card dos 4 stories da concorrente @perfumariadobairro (cupom BAIRRO15 15% até domingo com link para o site; Malbec Gold de R$ 219,90 por R$ 139,90 em 4x com brinde mini 25 ml; Kit Verão solar FPS 50 + pós-sol por R$ 79,90 com contagem regressiva; caixa de perguntas pedindo sugestão de perfume), seguido de leitura geral focada em preços comparáveis e mecânicas de promoção que a Kindo pode replicar. Sem métricas inventadas.",
+      "files": [
+        "evals/files/concorrente_01.png",
+        "evals/files/concorrente_02.png",
+        "evals/files/concorrente_03.png",
+        "evals/files/concorrente_04.png"
+      ],
+      "expectations": [
+        "Lista os 4 cards na ordem de publicação (cupom, Malbec Gold, Kit Verão, caixa de perguntas)",
+        "Cupom BAIRRO15 de 15% e validade 'até domingo' transcritos",
+        "Malbec Gold transcrito como de R$ 219,90 por R$ 139,90, 4x de R$ 34,98, com brinde mini Malbec 25 ml",
+        "Kit Verão transcrito como os 2 por R$ 79,90 (separados R$ 104,80) com contagem regressiva",
+        "Identifica a caixa de perguntas como pedido de sugestão de perfume para promoção",
+        "Leitura geral destaca preços comparáveis ao mix da Kindo e mecânicas replicáveis (cupom, brinde, kit, contagem regressiva)",
+        "Não inventa métricas de visualização nem tenta acessar instagram.com",
+        "Resposta em português, card a card em lista"
+      ]
     }
   ]
 }

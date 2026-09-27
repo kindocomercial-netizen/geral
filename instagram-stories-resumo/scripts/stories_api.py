@@ -8,9 +8,12 @@ Uso:
     python3 stories_api.py --out ./stories_hoje
 
     python3 stories_api.py --json-in stories.json --out ./reprocessado   # sem chamar a API
+    python3 stories_api.py --discovery perfumariaxyz --out ./concorrente  # posts públicos de outra conta
 
 Saída: <out>/stories.json e os arquivos de mídia numerados na ordem de
 publicação. Erros de insight ficam registrados por story, sem interromper.
+Com --discovery, a saída é <out>/discovery.json com os últimos posts do
+feed da conta pública (stories de terceiros não existem na API).
 """
 
 import argparse
@@ -100,6 +103,22 @@ def fetch_insights(token, story_id):
     return out, errors
 
 
+DISCOVERY_FIELDS = ("username,name,followers_count,media_count,biography,"
+                    "media.limit({limit}){{id,caption,media_type,media_url,thumbnail_url,"
+                    "permalink,timestamp,like_count,comments_count}}")
+
+
+def fetch_discovery(token, ig_user_id, username, limit=25):
+    """Posts recentes de uma conta Business/Creator pública, via Business Discovery."""
+    fields = f"business_discovery.username({username}){{{DISCOVERY_FIELDS.format(limit=limit)}}}"
+    data = get(ig_user_id, token, fields=fields)
+    bd = data.get("business_discovery", {})
+    posts = bd.get("media", {}).get("data", [])
+    posts.sort(key=lambda p: p.get("timestamp", ""))
+    perfil = {k: bd.get(k) for k in ("username", "name", "followers_count", "media_count", "biography")}
+    return perfil, posts
+
+
 def download(url, dest):
     with requests.get(url, stream=True, timeout=60) as r:
         r.raise_for_status()
@@ -121,10 +140,48 @@ def main():
     ap.add_argument("--json-in", help="reprocessa um stories.json existente em vez de chamar a API")
     ap.add_argument("--no-media", action="store_true", help="não baixa a mídia")
     ap.add_argument("--no-insights", action="store_true", help="não puxa insights")
+    ap.add_argument("--discovery", metavar="USUARIO",
+                    help="em vez dos stories da própria conta, traz os posts públicos do feed desta conta")
+    ap.add_argument("--limit", type=int, default=25, help="quantidade de posts no --discovery")
     args = ap.parse_args()
 
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
+
+    if args.discovery:
+        token = os.environ.get("IG_ACCESS_TOKEN")
+        if not token:
+            sys.exit("IG_ACCESS_TOKEN não definido. A Business Discovery usa o token da conta da Kindo; "
+                     "sem ele, peça os prints da conta concorrente.")
+        ig_user_id = os.environ.get("IG_USER_ID") or discover_ig_user(token)
+        username = args.discovery.lstrip("@")
+        try:
+            perfil, posts = fetch_discovery(token, ig_user_id, username, args.limit)
+        except RuntimeError as e:
+            sys.exit(f"Business Discovery falhou para @{username}: {e}\n"
+                     "Costuma ser conta pessoal (não Business/Creator) ou privada; só restam os prints.")
+        for i, p in enumerate(posts, 1):
+            p["ordem"] = i
+            if not args.no_media:
+                url = p.get("media_url") or p.get("thumbnail_url")
+                if url:
+                    ext = ".mp4" if p.get("media_type") == "VIDEO" and p.get("media_url") else ".jpg"
+                    dest = out / f"{i:02d}_{p['id']}{ext}"
+                    try:
+                        download(url, dest)
+                        p["arquivo"] = str(dest)
+                    except Exception as e:
+                        p["arquivo_erro"] = str(e)
+        (out / "discovery.json").write_text(json.dumps({"perfil": perfil, "posts": posts},
+                                                        ensure_ascii=False, indent=2))
+        print(f"@{perfil.get('username')} — {perfil.get('followers_count')} seguidores, "
+              f"{perfil.get('media_count')} posts; {len(posts)} recentes -> {out / 'discovery.json'}\n")
+        print(f"{'#':>2}  {'data':<12} {'tipo':<15} {'curt':>6} {'coment':>6}  legenda")
+        for p in posts:
+            print(f"{p['ordem']:>2}  {fmt_time(p.get('timestamp')):<12} {p.get('media_type', '?'):<15} "
+                  f"{str(p.get('like_count', '-')):>6} {str(p.get('comments_count', '-')):>6}  "
+                  f"{(p.get('caption') or '')[:80]!r}")
+        return
 
     if args.json_in:
         stories = json.loads(Path(args.json_in).read_text())
