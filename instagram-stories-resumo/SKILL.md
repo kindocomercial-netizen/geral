@@ -55,6 +55,11 @@ nenhum dos canais 2 a 4 devolve stories de terceiros. O que funciona:
   pública com legenda, tipo, data, curtidas e comentários, mais número de
   seguidores. Exige `IG_ACCESS_TOKEN` da Kindo. Serve para "o que a loja X
   está anunciando", mesmo sem os stories.
+- **Anúncios pagos da concorrente**: `ads_library_search` (conector Meta)
+  lista os anúncios ativos de qualquer página no Brasil, sem token. Devolve
+  nome da página, título do link, data e o link do anúncio; o texto e a
+  imagem só abrem no navegador de Julio. Serve para saber se a concorrente
+  está pagando mídia, desde quando e com qual chamada.
 - **Serviço externo de coleta de stories** (Apify e similares): só se Julio
   contratar e pedir; veja o aviso em `references/canais.md`.
 

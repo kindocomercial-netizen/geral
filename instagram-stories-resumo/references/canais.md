@@ -137,6 +137,44 @@ da própria conta autenticada.
 Saída: `<out>/discovery.json` e a mídia baixada. Resuma os posts com o
 mesmo formato de card a card, trocando "views" por curtidas e comentários.
 
+### Como obter o token (`IG_ACCESS_TOKEN`)
+
+Sem o token, nem os stories da Kindo nem os posts públicos de concorrentes
+saem pela API. Julio gera o token uma vez:
+
+1. Em developers.facebook.com, criar um app do tipo "Empresa" (ou usar um
+   existente) e adicionar o produto "Instagram Graph API".
+2. Abrir o Graph API Explorer, escolher o app, e em "Permissões" marcar
+   `instagram_basic`, `instagram_manage_insights`, `pages_show_list`,
+   `pages_read_engagement` e `business_management`. Clicar em "Generate
+   Access Token" e autorizar com o Facebook que administra a página
+   "Kindo Perfumaria".
+3. Trocar o token curto por um de longa duração (60 dias) em
+   `GET /oauth/access_token?grant_type=fb_exchange_token&client_id=<app_id>&client_secret=<app_secret>&fb_exchange_token=<token_curto>`.
+4. Guardar o token no ambiente do Claude Code: menu do ambiente na barra de
+   título da sessão, "Edit", variável de ambiente `IG_ACCESS_TOKEN` (e
+   opcionalmente `IG_USER_ID` = 17841432233383494). Uma sessão nova já
+   enxerga a variável. Nunca colar o token no chat.
+
+Enquanto o app estiver em modo de desenvolvimento, só os usuários do app
+conseguem gerar token, o que basta para uso próprio.
+
+### Biblioteca de Anúncios (anúncios pagos de qualquer página)
+
+`ads_library_search` do conector Meta funciona sem token e sem vínculo com
+a página pesquisada. Testado em 27/09/2026 com `countries=["BR"]`.
+
+- Devolve por anúncio: `page_name`, `page_id`, `ad_creative_link_title`,
+  datas de criação e início, `ad_snapshot_url`, e `estimated_total_count`.
+- Não devolve o texto do anúncio nem a imagem; o snapshot exige login e
+  não abre daqui (403). Julio abre o link no navegador.
+- `search_terms` busca no texto do criativo, não no nome da página. Para
+  uma concorrente específica, use `page_ids` com o ID da página dela
+  (aparece na aba "Sobre" ou "Transparência da página" no Facebook), com
+  `ad_active_status="ACTIVE"`.
+- Uso na skill: dizer se a concorrente está anunciando, quantos anúncios
+  ativos, desde quando, e a chamada do botão. Não confundir com stories.
+
 ### Serviços externos de coleta de stories
 
 Existem serviços pagos (Apify "Instagram Story Scraper" e similares) que
