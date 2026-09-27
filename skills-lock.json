@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "instagram-api": {
+      "source": "fetcher-sh/fetcher-skills",
+      "sourceType": "github",
+      "skillPath": "skills/instagram-api/SKILL.md",
+      "computedHash": "38bd196eed325d986b1fd6090f4156911d733114581d49e324ea4fa889752829"
+    }
+  }
+}
