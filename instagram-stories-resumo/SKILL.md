@@ -103,6 +103,12 @@ Regras que fazem diferença para Julio:
 - Com métricas, calcule a retenção (views do último card ÷ views do
   primeiro) e aponte o card com maior queda. Saídas e toques para frente
   altos indicam card fraco; respostas e toques para trás indicam interesse.
+  Views de print podem subir de um card para o próximo (gente que entrou
+  depois, direto no card novo); trate a queda como sinal, não como contagem
+  exata de saídas, e diga quando a audiência se recuperou.
+- Sem métricas (print de seguidor, sem números), não escreva uma linha de
+  métricas para dizer que não há métricas. Se fizer sentido, ofereça em uma
+  frase no fim puxar os números pelo Windsor.
 - Sugestões só quando ele pedir ou quando o padrão for evidente (por
   exemplo, preço sem chamada para ação em todos os cards). No máximo três,
   concretas.

@@ -56,14 +56,27 @@ get_data(
 )
 ```
 
+A conta da Kindo no Windsor é a `17841432233383494` ("Kindo Perfumaria
+(kindoperfumaria)"). Passe `accounts=["17841432233383494"]` para manter a
+resposta pequena.
+
 Limites: a API da Meta só expõe métricas de story por 24 horas; o Windsor
 guarda o histórico do que já coletou, então dias anteriores podem ou não
 aparecer. O conector não traz a imagem do story nem o texto na tela; para
 saber o conteúdo, junte com prints ou com a thumbnail.
 
-Se a chamada voltar "needs you to sign in again", o conector precisa ser
-reautenticado por Julio nas configurações de conectores do claude.ai.
-Não há como fazer isso de dentro da sessão.
+Tabelas de story vazias (`story_id` sem linhas) enquanto a tabela de perfil
+responde normalmente significam uma de duas coisas: não houve story no
+período, ou o Windsor não coletou. Não dá para distinguir de dentro da
+sessão, então relate o que veio ("o Windsor não devolveu nenhum story") sem
+afirmar que a loja não postou.
+
+O aviso "needs you to sign in again" às vezes aparece em `get_connectors`
+mesmo com o conector funcionando. Antes de concluir que está
+desautenticado, tente um `get_data` direto no conector `instagram`. Se o
+`get_data` também falhar por autenticação, aí sim o conector precisa ser
+reautenticado por Julio nas configurações de conectores do claude.ai; não
+há como fazer isso de dentro da sessão.
 
 ## 3. Conector Meta (Ads MCP)
 

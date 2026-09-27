@@ -33,6 +33,15 @@ não escreva "não disponível" em cada linha.
 - **Toque para trás**: voltou para rever. Alto = card prendeu atenção.
 - **Arrastou para o próximo perfil**: abandonou a conta neste card.
 
+Views tiradas de prints não são uma sequência decrescente exata: quem abre
+os stories horas depois entra direto no card mais recente, e a contagem
+ainda cresce enquanto o card está no ar. Por isso um card mais novo pode
+ter mais views que o anterior, e isso não é erro de leitura. Trate a queda
+entre cards como sinal de onde o interesse caiu, não como contagem exata
+de saídas; saídas e toques exatos só vêm dos insights (Windsor ou API).
+Quando as views voltam a subir depois de um card fraco, diga isso como
+recuperação de audiência, sem inventar causa.
+
 ## Exemplo com métricas do Windsor
 
 ```
