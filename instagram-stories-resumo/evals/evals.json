@@ -1,0 +1,63 @@
+{
+  "skill_name": "instagram-stories-resumo",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "aqui os prints dos stories da kindo de hoje, me da um resumo do que a equipe postou",
+      "expected_output": "Resumo em português com um item por card na ordem de publicação (5 cards), preços transcritos exatamente (Kaiak Aventura de R$ 189,90 por R$ 119,90; Episol Color R$ 89,90 ou 3x R$ 29,97), enquete Malbec Gold x Essencial Oud, link 'Comprar no WhatsApp', repost da cliente @mariaclara.souza, e uma leitura geral curta com ofertas e CTAs em lista.",
+      "files": [
+        "evals/files/kindo_seguidor_01.png",
+        "evals/files/kindo_seguidor_02.png",
+        "evals/files/kindo_seguidor_03.png",
+        "evals/files/kindo_seguidor_04.png",
+        "evals/files/kindo_seguidor_05.png"
+      ],
+      "expectations": [
+        "O resumo lista os 5 cards, um item por card, na ordem de publicação (vitrine, Kaiak, enquete, Episol, repost)",
+        "Preço do Kaiak Aventura transcrito como de R$ 189,90 por R$ 119,90",
+        "Preço do Episol Color transcrito como R$ 89,90 com parcelamento 3x de R$ 29,97",
+        "Enquete identificada com as duas opções: Malbec Gold e Essencial Oud",
+        "Sticker de link 'Comprar no WhatsApp' identificado como chamada para ação",
+        "Repost da cliente @mariaclara.souza identificado como repost/menção",
+        "Resposta em português, com ofertas e CTAs em lista (não dissolvidos em prosa)",
+        "Não inventa métricas de visualização (os prints eram da visão de seguidor, sem números)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "me da o resumo dos stories da kindoperfumaria de hoje",
+      "expected_output": "Sem prints e sem canal funcionando (Windsor pede reautenticação, conector Meta sem conta IG liberada, sem IG_ACCESS_TOKEN), a resposta explica em poucas linhas por que não conseguiu ver os stories, pede os prints ou gravação de tela (explicando como tirar), avisa que o Windsor precisa ser reconectado, e não descreve nenhum story inventado.",
+      "files": [],
+      "expectations": [
+        "Não descreve nenhum story (nenhum conteúdo de card inventado)",
+        "Explica em poucas linhas por que não conseguiu ver os stories",
+        "Pede prints ou gravação de tela e explica como tirar",
+        "Avisa que o Windsor precisa ser reconectado/reautenticado ou que o canal de API não está disponível",
+        "Não tenta scraping de instagram.com nem sugere visualizador anônimo de stories",
+        "Tentou pelo menos um canal de dados (Windsor ou conector Meta) antes de pedir material"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "tirei print dos meus stories pelo perfil da loja, com as visualizacoes. qual story foi melhor e onde o pessoal saiu? o que tinha em cada um?",
+      "expected_output": "Resumo card a card com o número de visualizações de cada um (412, 388, 201, 350, 344), identifica o card 1 (vitrine) como o mais visto e o card 3 (enquete) como o de maior queda (388 para 201), calcula a retenção (344/412 = 83%), transcreve preços e stickers corretamente e indica que o card 4 recuperou a audiência.",
+      "files": [
+        "evals/files/kindo_dono_01.png",
+        "evals/files/kindo_dono_02.png",
+        "evals/files/kindo_dono_03.png",
+        "evals/files/kindo_dono_04.png",
+        "evals/files/kindo_dono_05.png"
+      ],
+      "expectations": [
+        "Registra as visualizações por card: 412, 388, 201, 350, 344",
+        "Aponta o card 1 (vitrine/bom dia) como o mais visto",
+        "Aponta a maior queda entre o card 2 e o card 3 (388 para 201), a enquete",
+        "Calcula a retenção do primeiro ao último card (cerca de 83%)",
+        "Nota que o card 4 (Episol) recuperou audiência (350) depois da queda",
+        "Transcreve os preços corretamente (Kaiak por R$ 119,90; Episol R$ 89,90)",
+        "Enquete com resultado 44% Malbec Gold e 56% Essencial Oud",
+        "Card a card em lista numerada, em português"
+      ]
+    }
+  ]
+}
