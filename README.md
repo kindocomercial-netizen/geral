@@ -15,6 +15,21 @@ O fluxo de conteúdo vai em três etapas encadeadas, mais uma skill independente
 
 Cada pasta segue o formato padrão de skill: `SKILL.md` (instruções), `scripts/` (utilitários em Python e shell), `references/` (material de apoio). Fontes de terceiros ficam íntegras em `references/fontes/` com as licenças MIT e um `ORIGEM.md` apontando repositório, caminho e commit de origem.
 
+### Instalação
+
+Nas sessões do Claude Code na web, `.claude/hooks/session-start.sh` roda sozinho no início de cada sessão e deixa tudo pronto: Playwright (preso na versão do Chromium do container), Pillow, google-genai, yt-dlp, a CLI do Firecrawl, as fontes Fraunces, Inter e Caveat, a configuração do yt-dlp que contorna o bloqueio do YouTube em IP de nuvem, e os atalhos em `~/.claude/skills/` que as instruções das skills usam.
+
+Duas chaves precisam ser cadastradas como variáveis de ambiente nas configurações do ambiente da nuvem. Nunca comite as chaves.
+
+| Variável | Usada por | Onde obter |
+|---|---|---|
+| `FIRECRAWL_API_KEY` | `tendencias` (TikTok, Instagram, Reddit, imprensa, Amazon, busca do YouTube) | firecrawl.dev |
+| `GEMINI_API_KEY` | `nanobanana` | aistudio.google.com/apikey |
+
+Sem as chaves, o resto já funciona: Google em alta, autocompletar, Google Trends, números e comentários do YouTube, conferência do carrossel e a arte.
+
+Na máquina local, o equivalente é copiar as pastas de `.claude/skills/` para `~/.claude/skills/` e instalar as dependências abaixo.
+
 ### Dependências dos scripts
 
 - `tendencias`: `curl`, `yt-dlp`, a CLI `firecrawl` e Python 3 (só biblioteca padrão).
