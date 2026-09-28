@@ -1,0 +1,4 @@
+{"skill_name":"tendencias","evals":[
+{"id":1,"prompt":"/tendencias — trabalho com inteligência artificial e automação, quero ideias pro meu Instagram","expected_output":"Radar com 5-8 tendências da última semana com links reais e ideias de post para Instagram, salvo em arquivo"},
+{"id":2,"prompt":"quero saber o que tá bombando em confeitaria artesanal esse mês pra postar no tiktok","expected_output":"Radar do último mês adaptado ao TikTok"},
+{"id":3,"prompt":"me dá as tendências do meu nicho","expected_output":"A skill pergunta o nicho antes de pesquisar"}]}

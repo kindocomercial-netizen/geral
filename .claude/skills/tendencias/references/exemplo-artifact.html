@@ -1,0 +1,158 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Radar: alerta no celular</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+:root{
+  --bg:#f3f4f6; --surface:#ffffff; --ink:#15191f; --muted:#5b6472; --line:#d9dde3;
+  --extremo:#d9361e; --severo:#c98a06; --ok:#1f8a4c; --info:#2d5fa8;
+  --chip-ok:#e3f3ea; --chip-warn:#fbf0d8; --chip-no:#fbe3de;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1216; --surface:#181c22; --ink:#e8ebef; --muted:#9aa3af; --line:#2a3039;
+  --extremo:#ff6a4f; --severo:#f0b43a; --ok:#4cc27f; --info:#7aa7ec;
+  --chip-ok:#16301f; --chip-warn:#33290f; --chip-no:#3a1a14; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1216; --surface:#181c22; --ink:#e8ebef; --muted:#9aa3af; --line:#2a3039;
+  --extremo:#ff6a4f; --severo:#f0b43a; --ok:#4cc27f; --info:#7aa7ec;
+  --chip-ok:#16301f; --chip-warn:#33290f; --chip-no:#3a1a14; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font:15px/1.6 var(--body);padding-inline:16px;padding-block:0 48px}
+.wrap{max-width:980px;margin:0 auto}
+a{color:var(--info)}
+h1,h2,h3{font-family:var(--display);letter-spacing:.01em;text-wrap:balance;line-height:1.1;margin:0}
+h1{font-size:clamp(34px,6vw,54px)}
+h2{font-size:28px;margin-bottom:12px}
+h3{font-size:22px}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+header{padding-block:28px 20px;border-bottom:3px solid var(--extremo);display:grid;gap:10px}
+.meta{color:var(--muted);font-size:13px}
+section{padding-block:28px;border-bottom:1px solid var(--line)}
+.summary{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.sum{background:var(--surface);border:1px solid var(--line);padding:14px 16px;--dot:var(--muted)}
+.sum b{display:flex;align-items:center;gap:8px;font-family:var(--display);font-size:18px;margin-bottom:4px}
+.sum b::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--dot);flex:none}
+.sum.go{--dot:var(--ok)} .sum.warn{--dot:var(--severo)} .sum.hot{--dot:var(--extremo)}
+.tablebox{overflow-x:auto;background:var(--surface);border:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:13.5px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 11px/1.2 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+td.sig{font:500 16px/1 var(--mono);text-align:center}
+.legend{font-size:12.5px;color:var(--muted);margin-top:8px}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-weight:600;font-size:12.5px;white-space:nowrap}
+.p-go{background:var(--chip-ok);color:var(--ok)} .p-warn{background:var(--chip-warn);color:var(--severo)} .p-no{background:var(--chip-no);color:var(--extremo)}
+.trend{display:grid;gap:8px;padding:18px 0;border-top:1px dashed var(--line)}
+.trend:first-of-type{border-top:0}
+.trend p{margin:0;max-width:72ch}
+.trend .k{font-weight:600}
+blockquote{margin:4px 0;padding:8px 12px;background:var(--surface);border:1px solid var(--line);border-radius:6px;color:var(--ink);font-style:italic;max-width:72ch}
+blockquote span{font-style:normal;color:var(--muted);font-size:12.5px}
+.slides{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+.slide{aspect-ratio:4/5;max-width:100%;background:var(--surface);border:1px solid var(--line);padding:16px;display:flex;flex-direction:column;gap:8px}
+.slide .n{font:500 12px/1 var(--mono);color:var(--muted)}
+.slide .t{font-family:var(--display);font-size:22px;line-height:1.1;font-weight:700}
+.slide .b{font-size:13.5px;flex:1}
+.slide .src{font-size:11.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:6px}
+.slide.cover{background:var(--extremo);border-color:var(--extremo);color:#fff}
+.slide.cover .n,.slide.cover .src{color:#ffe3dc;border-color:#ffffff55}
+ul.care{margin:0;padding-left:18px;display:grid;gap:6px;max-width:75ch}
+.how{font-size:13px;color:var(--muted);max-width:80ch}
+:focus-visible{outline:2px solid var(--info);outline-offset:2px}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">Radar de tendências · 27/09/2026 · Brasil · Instagram (carrossel)</span>
+  <h1>O alarme que toca no celular</h1>
+  <p class="meta">Tema: alertas de emergência da Defesa Civil (cell broadcast). Janela: última semana. 5 de 7 assuntos checados. Primeira pesquisa deste tema.</p>
+</header>
+
+<section>
+  <h2>Resumo</h2>
+  <div class="summary">
+    <div class="sum hot"><b>O que domina</b>"Cell broadcast" no Google foi de 0 a 100 em 27/09, puxado pelo Rio Grande do Sul. "Como receber alerta da defesa civil rs" aparece como aumento repentino.</div>
+    <div class="sum go"><b>Maior oportunidade</b>Quase todo post da semana ensina só o SMS 40199. Falta explicar o alerta que chega sozinho, os dois níveis e onde ajustar no celular.</div>
+    <div class="sum warn"><b>Maior cuidado</b>6.347 pessoas afetadas por granizo no RS (26 e 27/09). Post de utilidade, sem explorar a tragédia. O alerta "Misantropia" é de junho.</div>
+  </div>
+</section>
+
+<section>
+  <h2>Mapa de cruzamento</h2>
+  <div class="tablebox"><table>
+    <thead><tr><th>Assunto</th><th>Procura</th><th>Atenção</th><th>Oferta</th><th>Conversa</th><th>Fato</th><th>Diagnóstico</th><th>Nota</th><th>Decisão</th></tr></thead>
+    <tbody>
+      <tr><td>Como receber e ajustar o alerta</td><td class="sig">●</td><td class="sig">◐</td><td class="sig">●</td><td class="sig">◐</td><td class="sig">●</td><td>Lacuna de ângulo (SMS × alerta automático)</td><td>🟢</td><td><span class="pill p-go">✅ Vai</span></td></tr>
+      <tr><td>Alertas de 21 e 22/09 no Sul</td><td class="sig">●</td><td class="sig">◐</td><td class="sig">●</td><td class="sig">◐</td><td class="sig">●</td><td>Fim de onda (pico 22/09)</td><td>🟢</td><td><span class="pill p-warn">⚠️ Cuidado</span></td></tr>
+      <tr><td>Granizo no RS</td><td class="sig">●</td><td class="sig">◐</td><td class="sig">◐</td><td class="sig">?</td><td class="sig">●</td><td>Pauta de jornal, tema sensível</td><td>🟡</td><td><span class="pill p-warn">⚠️ Cuidado</span></td></tr>
+      <tr><td>Termo "alerta severo"</td><td class="sig">◐</td><td class="sig">◐</td><td class="sig">◐</td><td class="sig">◐</td><td class="sig">◐</td><td>Fim de onda</td><td>🔴</td><td><span class="pill p-no">⛔ Não vai</span></td></tr>
+      <tr><td>Falso alerta "Misantropia"</td><td class="sig">?</td><td class="sig">?</td><td class="sig">◐</td><td class="sig">?</td><td class="sig">◐</td><td>Antigo (junho)</td><td>🔴</td><td><span class="pill p-no">⛔ Não vai</span></td></tr>
+    </tbody>
+  </table></div>
+  <p class="legend">● forte · ◐ fraco · ○ medido e vazio · ? não medido. Procura = Google Trends; Atenção = YouTube (estouro views ÷ inscritos); Oferta = TikTok/Instagram; Conversa = Reddit e comentários; Fato = imprensa e fontes oficiais. A nota diz o quanto está provado; a decisão diz o que fazer.</p>
+</section>
+
+<section>
+  <h2>Tendências</h2>
+
+  <div class="trend">
+    <h3>1. Como o alerta chega ao celular e onde ajustar</h3>
+    <p><span class="pill p-go">✅ Vai — postar esta semana</span></p>
+    <p><span class="k">O que é:</span> o Defesa Civil Alerta chega sem cadastro a todo celular 4G/5G compatível na área de risco. A mensagem cobre a tela. O nível <b>extremo</b> toca sirene mesmo no silencioso; o <b>severo</b> faz um "beep" e respeita o silencioso. Já vem ativado. O SMS 40199 é outro serviço.</p>
+    <p><span class="k">Cruzamento:</span> procura explodiu no Sul; oferta alta, mas repetitiva (quase tudo é "mande o CEP para 40199"). Nenhum vídeo da semana estourou (0,0x a 0,1x views por inscrito).</p>
+    <p><span class="k">Onde pesa mais:</span> RS 100, SC 32, PR 22, MS 17, SP 15 (proporção, não volume).</p>
+    <p><span class="k">O que o público pensa</span> (22 comentários de um vídeo de jan/2025, o mais recente com audiência):</p>
+    <blockquote>"Tomei um baita susto kkkk achando q era vírus" <span>· 3 curtidas</span></blockquote>
+    <blockquote>"quando alerta chega já é pra pessoa se preparar pro pior" <span>· 17 curtidas</span></blockquote>
+    <p><span class="k">Checagem:</span> FAQ oficial do MIDR confere. A Apple diz que em alguns países não é possível desativar; a fonte brasileira não confirma se o extremo pode ser desligado. Não afirmar "dá para desligar tudo".</p>
+    <p><a href="https://www.gov.br/mdr/pt-br/assuntos/protecao-e-defesa-civil/defesa-civil-alerta">MIDR: FAQ</a> · <a href="https://support.apple.com/pt-br/111817">Apple Suporte</a> · <a href="https://www.gov.br/mcom/pt-br/noticias/noticias_alt/2026/julho/como-receber-alertas-da-defesa-civil-sobre-situacoes-de-emergencia-no-celular">MCom</a> · <a href="https://www.abcmais.com/regiao/alerta-no-celular-saiba-como-agir-quando-chega-um-cell-broadcast/">abcmais</a> · <a href="https://telesintese.com.br/defesa-civil-quadruplica-alertas-por-cell-broadcast-em-um-ano/">Telesíntese</a></p>
+  </div>
+
+  <div class="trend">
+    <h3>2. Os alertas de 21 e 22/09 no Sul</h3>
+    <p><span class="pill p-warn">⚠️ Cuidado — só como "o que ficou"</span></p>
+    <p>A maioria dos avisos dizia: "Alerta Vermelho para tempestades com rajadas de vento acima de 90km/h na próxima hora. Busque abrigo." O RS recebeu 33 alertas em 2026 (4 simulados), contra 10 em 2025. Procura teve pico em 22/09 e caiu para 4–5.</p>
+  </div>
+
+  <div class="trend">
+    <h3>3. Granizo no RS</h3>
+    <p><span class="pill p-warn">⚠️ Cuidado — tema sensível</span></p>
+    <p>6.347 pessoas afetadas e 1.314 casas danificadas (boletim preliminar, 27/09). Entra só como contexto em uma linha, sem foto de estrago nem número como gancho. <a href="https://gauchazh.clicrbs.com.br/geral/noticia/2026/09/temporais-com-granizo-afetam-mais-de-seis-mil-pessoas-no-rs-cmujtn6gp028r014xgtc5ok17.html">GZH</a></p>
+  </div>
+
+  <div class="trend">
+    <h3>4. Termo "alerta severo" · 5. Falso alerta "Misantropia"</h3>
+    <p><span class="pill p-no">⛔ Não vai</span></p>
+    <p>"Alerta severo" teve pico em 21/09 e zerou; serve só como vocabulário no carrossel. O "Misantropia" foi em junho (Agência Brasil, 20/06): não é novidade da semana.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Carrossel para a demo</h2>
+  <p class="how">Ângulo: o alarme que toca no seu celular — o que é, os dois níveis e onde ajustar. O Sul entra como contexto, nunca como tragédia.</p>
+  <div class="slides">
+    <div class="slide cover"><span class="n">1 / 8 · capa</span><span class="t">O alarme que tocou no seu celular não é vírus.</span><span class="b">E ele tem dois níveis.</span><span class="src">Frase do público (comentário no YouTube) · Google Trends 27/09</span></div>
+    <div class="slide"><span class="n">2 / 8</span><span class="t">Chama Defesa Civil Alerta</span><span class="b">Chega sozinho, sem cadastro, a todo celular na área de risco.</span><span class="src">FAQ MIDR (gov.br)</span></div>
+    <div class="slide"><span class="n">3 / 8</span><span class="t">Dois níveis</span><span class="b">EXTREMO toca sirene até no silencioso. SEVERO faz um "beep" e respeita o silencioso.</span><span class="src">FAQ MIDR</span></div>
+    <div class="slide"><span class="n">4 / 8</span><span class="t">Leia até o fim</span><span class="b">A mensagem cobre a tela e só some quando você toca. Ela diz o que fazer, como "Busque abrigo".</span><span class="src">FAQ MIDR · abcmais 24/09</span></div>
+    <div class="slide"><span class="n">5 / 8</span><span class="t">No Android</span><span class="b">Configurações › Segurança e emergência › Alertas de emergência sem fio. O caminho pode mudar por marca.</span><span class="src">FAQ MIDR</span></div>
+    <div class="slide"><span class="n">6 / 8</span><span class="t">No iPhone</span><span class="b">Ajustes › Notificações › role até o fim › Alertas do Governo. Já vem ativado.</span><span class="src">Apple Suporte · MIDR</span></div>
+    <div class="slide"><span class="n">7 / 8</span><span class="t">Não recebeu?</span><span class="b">Precisa de celular 4G/5G compatível e sinal da operadora; Wi-Fi não basta. Reforço: SMS com seu CEP para 40199 (outro serviço, grátis).</span><span class="src">FAQ MIDR · MCom jul/2026</span></div>
+    <div class="slide"><span class="n">8 / 8 · fechamento</span><span class="t">Por que agora</span><span class="b">RS: 33 alertas em 2026, contra 10 em 2025. Brasil: 1.768 no 1º semestre, 4× mais. Mande para quem você cuida.</span><span class="src">abcmais · Telesíntese</span></div>
+  </div>
+  <h3 style="margin-top:22px">Cuidados</h3>
+  <ul class="care">
+    <li>Nada de foto de destruição, número de vítimas como gancho ou tom de medo.</li>
+    <li>Não dizer "dá para desligar tudo": a fonte oficial brasileira não confirma.</li>
+    <li>Pôr a ressalva de fabricante no caminho do Android.</li>
+    <li>O "4×" é nacional e semestral; o "33 contra 10" é só do RS. Não misturar na mesma frase.</li>
+  </ul>
+</section>
+
+<section style="border-bottom:0">
+  <h2>Como foi feito</h2>
+  <p class="how">Cerca de 20 buscas no Firecrawl, 7 páginas lidas (g1 e Correio do Povo só pelo resumo), 3 consultas ao Google Trends pelo navegador, 22 comentários de 1 vídeo e 3 vídeos com estouro medido. Limites: 3 buscas de imprensa com filtro de semana voltaram vazias (compensadas sem filtro, com datas conferidas); Reddit vazio; comentários de um vídeo de 2025; não há confirmação oficial sobre desligar o alerta extremo no Brasil.</p>
+</section>
+</div>
