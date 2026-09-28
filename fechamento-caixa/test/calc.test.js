@@ -149,3 +149,11 @@ test('diagnóstico: diferença que se desfaz com a de ontem ou com outro caixa',
   assert.ok(titulos(r).includes('Compensa a diferença do fechamento anterior'));
   assert.ok(titulos(r).includes('Compensa a diferença do Caixa 2'));
 });
+
+test('diagnóstico: relatório do sistema menor que cartões e PIX', () => {
+  // Caixa 3 de 01/06/2026 na planilha: sistema 74,96 com R$ 302,38 em cartões e PIX
+  const cx3 = { caixa: 3, sistema: 7496, trocoInicial: 30215, credito: 4999, debito: 10795, pix: 14444, trocoFinal: 22245, sangrias: [15000] };
+  const r = C.diagnosticar(cx3, { perfil });
+  assert.equal(r.diferenca, 29772);
+  assert.equal(r.dicas[0].titulo, 'Relatório do sistema menor que os cartões e o PIX');
+});

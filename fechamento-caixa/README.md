@@ -46,6 +46,7 @@ Cada operador lança o fechamento do próprio caixa no fim do dia, pelo celular 
 | Dois números trocados de lugar | Débito 1.215,12 no lugar de 1.251,12 |
 | Zero a mais ou a menos | Sistema 37.032,60 no lugar de 3.703,26 |
 | Forma de pagamento zerada que costuma aparecer | PIX em branco num caixa onde PIX é 12% das vendas |
+| Relatório do sistema menor que cartões e PIX | Sistema R$ 74,96 com R$ 302,38 em cartões e PIX (relatório tirado cedo ou de outro caixa) |
 | Forma de pagamento muito acima do normal | Maquininha do dia todo lançada num caixa só |
 | Troco inicial diferente do fechamento anterior | Abriu com R$ 1.066,55, mas ontem fechou com R$ 966,55 |
 | Diferença que se desfaz com a do dia anterior | −R$ 100,84 num dia e +R$ 100,98 no seguinte |

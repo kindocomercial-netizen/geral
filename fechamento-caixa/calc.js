@@ -192,8 +192,10 @@
     const valores = valoresDigitados(c);
 
     // 1. Um valor lançado igual à diferença: em dobro, de outro caixa, ou não entrou na gaveta
+    let sangriaIgual = false;
     for (const v of valores) {
       if (!perto(v.valor, abs)) continue;
+      if (v.campo === 'sangrias') { if (sangriaIgual) continue; sangriaIgual = true; }
       if (!falta && !v.sistema) {
         add('alta', `${v.rotulo} tem o mesmo valor da sobra`,
           v.campo === 'sangrias' ? `Essa sangria de ${formatar(v.valor)} pode ter sido lançada duas vezes.`
@@ -230,8 +232,17 @@
       }
     }
 
+    // 3b. Cartões e PIX somam mais que o total de vendas do sistema: o relatório está errado ou incompleto
+    const eletronico = r.cartoes + (c.pix || 0);
+    const sistemaBaixo = !falta && c.sistema && eletronico > c.sistema;
+    if (sistemaBaixo) {
+      add('alta', 'Relatório do sistema menor que os cartões e o PIX',
+        `Só cartões e PIX somam ${formatar(eletronico)}, mais que o total de vendas lançado (${formatar(c.sistema)}). ` +
+        'O relatório do sistema pode ter sido tirado antes do fim do dia, ser de outro caixa ou ter sido digitado errado.', 'sistema');
+    }
+
     // 4. Forma de pagamento muito acima do normal (só em sobra)
-    if (!falta && perfil?.formas && c.sistema) {
+    if (!falta && !sistemaBaixo && perfil?.formas && c.sistema) {
       for (const f of FORMAS) {
         const p = perfil.formas[f.id];
         if (!c[f.id] || !p?.p95) continue;
