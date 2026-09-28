@@ -1,0 +1,9 @@
+{
+  "name": "fechamento-caixa",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Fechamento de caixa diário por caixa (sistema × gaveta), com calendário de diferenças e painel.",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  }
+}

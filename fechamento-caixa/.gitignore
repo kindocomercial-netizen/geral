@@ -1,0 +1,7 @@
+# dados financeiros da loja ficam fora do repositório
+dados.js
+*.xlk
+*.xlsx
+*.xlsm
+historico*.json
+backup-caixa-*.json

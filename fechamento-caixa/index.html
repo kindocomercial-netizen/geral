@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Fechamento de Caixa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="marca">
+      <span class="marca-selo" aria-hidden="true">Cx</span>
+      <div>
+        <h1>Fechamento de Caixa</h1>
+        <p id="topo-sub">Sistema × gaveta, caixa por caixa</p>
+      </div>
+    </div>
+    <nav aria-label="Seções">
+      <button class="aba ativa" data-aba="dia" id="aba-btn-dia">Dia</button>
+      <button class="aba" data-aba="calendario" id="aba-btn-calendario">Calendário</button>
+      <button class="aba" data-aba="painel" id="aba-btn-painel">Painel</button>
+      <button class="aba" data-aba="config" id="aba-btn-config">Ajustes</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- DIA -->
+    <section id="aba-dia" class="painel">
+      <div class="barra-dia">
+        <label class="campo-data">Data do fechamento
+          <input type="date" id="in-data">
+        </label>
+        <div class="dia-info">
+          <strong id="dia-semana"></strong>
+          <span id="dia-estado" class="chip"></span>
+        </div>
+        <div class="dia-totais">
+          <div><span>Vendas do dia</span><strong id="dia-vendas">R$ 0,00</strong></div>
+          <div><span>Diferença do dia</span><strong id="dia-dif">R$ 0,00</strong></div>
+        </div>
+      </div>
+
+      <div id="caixas" class="caixas"></div>
+
+      <div class="rodape-dia">
+        <label class="obs">Observações do dia
+          <textarea id="in-obs" rows="2" placeholder="Justifique faltas e sobras, troca de operador, problema na maquininha..."></textarea>
+        </label>
+        <div class="acoes">
+          <button type="button" id="btn-salvar" class="primario">Salvar fechamento</button>
+          <button type="button" id="btn-excluir" class="perigo" hidden>Excluir dia</button>
+          <button type="button" id="btn-imprimir" class="so-local">Imprimir</button>
+          <button type="button" id="btn-ficha" class="so-local">Ficha em branco</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CALENDÁRIO -->
+    <section id="aba-calendario" class="painel" hidden>
+      <div class="barra-filtros">
+        <button type="button" id="cal-ant" aria-label="Mês anterior">‹</button>
+        <input type="month" id="cal-mes">
+        <button type="button" id="cal-prox" aria-label="Próximo mês">›</button>
+        <p id="cal-resumo" class="resumo-linha"></p>
+      </div>
+      <div class="legenda-status">
+        <span class="st st-ok">dentro da tolerância</span>
+        <span class="st st-falta">falta</span>
+        <span class="st st-sobra">sobra</span>
+        <span class="st st-pendente">gaveta não lançada</span>
+        <span class="st st-semVenda">sem venda</span>
+      </div>
+      <div class="rolagem"><div id="calendario" class="calendario"></div></div>
+    </section>
+
+    <!-- PAINEL -->
+    <section id="aba-painel" class="painel" hidden>
+      <div class="barra-filtros">
+        <label>Período <select id="pn-periodo"></select></label>
+      </div>
+      <div id="pn-kpis" class="kpis"></div>
+
+      <div class="grade-painel">
+        <article class="bloco">
+          <h2>Diferenças por caixa</h2>
+          <p class="nota">Só contam caixas com gaveta lançada. Faltas e sobras consideram a tolerância configurada.</p>
+          <div class="rolagem">
+            <table class="tabela" id="pn-caixas"></table>
+          </div>
+        </article>
+
+        <article class="bloco">
+          <h2>Como os clientes pagaram</h2>
+          <p class="nota">"Dinheiro e outros" é o relatório do sistema menos cartões e PIX.</p>
+          <div id="pn-mix"></div>
+        </article>
+
+        <article class="bloco largo">
+          <h2>Vendas por dia</h2>
+          <p class="nota">Relatório do sistema, somando os caixas.</p>
+          <div id="pn-vendas" class="grafico-vendas"></div>
+        </article>
+
+        <article class="bloco">
+          <h2>Maiores diferenças</h2>
+          <p class="nota">Toque para abrir o dia.</p>
+          <ol id="pn-ocorrencias" class="lista-ocorrencias"></ol>
+        </article>
+
+        <article class="bloco">
+          <h2>Gavetas não lançadas</h2>
+          <p class="nota">O sistema tem venda, mas a gaveta está em branco. Não entram nas diferenças.</p>
+          <ul id="pn-pendentes" class="lista-ocorrencias"></ul>
+        </article>
+      </div>
+    </section>
+
+    <!-- AJUSTES -->
+    <section id="aba-config" class="painel" hidden>
+      <div class="grade-painel">
+        <article class="bloco">
+          <h2>Caixas da loja</h2>
+          <label>Quantidade de caixas
+            <input type="number" id="cfg-qtd" min="1" max="8" step="1">
+          </label>
+          <label>Tolerância de diferença
+            <input class="moeda" id="cfg-tolerancia" inputmode="decimal" placeholder="2,00">
+          </label>
+          <p class="nota">Diferenças até esse valor aparecem em verde no calendário e não contam como falta ou sobra.</p>
+          <div class="acoes"><button type="button" id="btn-salvar-cfg" class="primario">Salvar ajustes</button></div>
+        </article>
+
+        <article class="bloco">
+          <h2>Backup e histórico</h2>
+          <p class="nota" id="cfg-contagem"></p>
+          <div class="acoes">
+            <button type="button" id="btn-backup" class="so-local">Baixar backup (.json)</button>
+            <button type="button" id="btn-csv" class="so-local">Baixar planilha (.csv)</button>
+            <button type="button" id="btn-copiar-csv">Copiar planilha</button>
+            <label class="botao" for="in-backup">Importar backup ou histórico</label>
+            <input type="file" id="in-backup" accept="application/json,.json" hidden>
+          </div>
+          <p class="nota">O histórico das planilhas antigas é gerado com <code>ferramentas/importar_planilhas.py</code>. Ao importar, dias com a mesma data são substituídos.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <!-- ficha de papel, igual à aba "ficha_fechamento" da planilha -->
+  <section id="ficha" class="ficha" aria-hidden="true"></section>
+
+  <div id="modal" class="modal" hidden>
+    <div class="modal-caixa" role="dialog" aria-modal="true" aria-labelledby="modal-texto">
+      <p id="modal-texto"></p>
+      <div class="acoes">
+        <button type="button" id="modal-sim" class="primario">Confirmar</button>
+        <button type="button" id="modal-nao">Cancelar</button>
+      </div>
+    </div>
+  </div>
+  <div id="aviso" class="aviso" role="status" hidden></div>
+  <div id="dica-grafico" class="dica-grafico" hidden></div>
+
+  <script src="dados.js" onerror="void 0"></script>
+  <script src="calc.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
