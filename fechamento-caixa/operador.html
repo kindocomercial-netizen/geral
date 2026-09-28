@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Fechamento do Operador</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="operador.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="marca">
+      <span class="marca-selo" aria-hidden="true">Cx</span>
+      <div>
+        <h1>Fechamento do Operador</h1>
+        <p id="conexao">Conectando…</p>
+      </div>
+    </div>
+    <nav aria-label="Seções">
+      <button class="aba ativa" data-aba="lancar" id="aba-btn-lancar">Lançar</button>
+      <button class="aba" data-aba="conferir" id="aba-btn-conferir">Conferência</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- LANÇAR -->
+    <section id="aba-lancar" class="painel">
+      <div id="hoje" class="hoje" aria-live="polite"></div>
+
+      <div class="op-grade">
+        <form id="form" class="op-form" autocomplete="off" novalidate>
+          <fieldset class="bloco">
+            <legend>Quem está fechando</legend>
+            <div class="op-linha2">
+              <label>Data <input type="date" id="f-data" required></label>
+              <label>Seu nome <input id="f-operador" placeholder="Ex.: Ana" required autocomplete="name"></label>
+            </div>
+            <div class="op-caixas" role="radiogroup" aria-label="Caixa" id="f-caixas"></div>
+            <p id="f-editando" class="nota" hidden></p>
+          </fieldset>
+
+          <fieldset class="bloco">
+            <legend>Relatório do sistema</legend>
+            <div class="linha"><span>Rel. caixa sistema<small>total de vendas do relatório</small></span><input class="moeda" id="f-sistema" data-k="sistema" inputmode="decimal" placeholder="0,00"></div>
+            <div class="linha"><span>Troco inicial<small id="dica-troco">o que havia na gaveta ao abrir</small></span><input class="moeda" id="f-trocoInicial" data-k="trocoInicial" inputmode="decimal" placeholder="0,00"></div>
+            <div class="linha"><span>Suprimento<small>reforço de troco durante o dia</small></span><input class="moeda" id="f-suprimento" data-k="suprimento" inputmode="decimal" placeholder="0,00"></div>
+          </fieldset>
+
+          <fieldset class="bloco">
+            <legend>Gaveta e maquininha</legend>
+            <div class="linha"><span>Crédito à vista</span><input class="moeda" id="f-credito" data-k="credito" inputmode="decimal" placeholder="0,00"></div>
+            <div class="linha"><span>Crédito parcelado</span><input class="moeda" id="f-creditoParcelado" data-k="creditoParcelado" inputmode="decimal" placeholder="0,00"></div>
+            <div class="linha"><span>Débito</span><input class="moeda" id="f-debito" data-k="debito" inputmode="decimal" placeholder="0,00"></div>
+            <div class="linha"><span>PIX</span><input class="moeda" id="f-pix" data-k="pix" inputmode="decimal" placeholder="0,00"></div>
+            <div class="linha"><span>Troco final<small>dinheiro que fica na gaveta</small></span><input class="moeda" id="f-trocoFinal" data-k="trocoFinal" inputmode="decimal" placeholder="0,00"></div>
+            <div class="linha-botoes"><button type="button" class="mini" id="btn-contar">Contar cédulas e moedas</button></div>
+            <div class="contagem" id="contagem" hidden></div>
+            <div class="sublista" id="lista-sangrias"></div>
+            <div class="linha"><span>Despesas<small>pagas com dinheiro do caixa</small></span><input class="moeda" id="f-despesas" data-k="despesas" inputmode="decimal" placeholder="0,00"></div>
+            <div class="linha"><span>Vale transporte</span><input class="moeda" id="f-valeTransporte" data-k="valeTransporte" inputmode="decimal" placeholder="0,00"></div>
+            <div class="sublista" id="lista-outros"></div>
+            <div class="linha-botoes">
+              <button type="button" class="mini" id="btn-add-sangria">+ sangria</button>
+              <button type="button" class="mini" id="btn-add-outro">+ outro recebimento</button>
+            </div>
+          </fieldset>
+        </form>
+
+        <aside class="op-resultado" id="resultado" aria-live="polite">
+          <div id="res-card" class="res-card r-semVenda">
+            <span id="res-rotulo">Preencha os valores</span>
+            <strong id="res-valor"></strong>
+            <dl class="res-contas">
+              <dt>Total sistema</dt><dd id="res-sis">R$ 0,00</dd>
+              <dt>Total gaveta</dt><dd id="res-gav">R$ 0,00</dd>
+            </dl>
+          </div>
+
+          <div id="diag" class="diag" hidden>
+            <h2 id="diag-titulo">Onde pode estar a diferença</h2>
+            <ol id="diag-lista"></ol>
+          </div>
+
+          <div id="bloco-just" class="bloco just" hidden>
+            <label class="check"><input type="checkbox" id="f-recontado"> Recontei a gaveta e conferi os comprovantes</label>
+            <label>O que aconteceu? <textarea id="f-just" rows="3" placeholder="Ex.: cliente pagou R$ 50 no PIX e passei como dinheiro"></textarea></label>
+            <p id="just-aviso" class="nota"></p>
+          </div>
+
+          <button type="button" id="btn-enviar" class="primario enviar">Enviar fechamento</button>
+          <p class="nota" id="enviar-nota"></p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- CONFERÊNCIA -->
+    <section id="aba-conferir" class="painel" hidden>
+      <div class="barra-filtros">
+        <label>Mostrar
+          <select id="c-filtro">
+            <option value="todos">Todos os envios</option>
+            <option value="alertas">Só com diferença</option>
+          </select>
+        </label>
+        <p id="c-resumo" class="resumo-linha"></p>
+      </div>
+      <div id="c-lista" class="c-lista"></div>
+    </section>
+  </main>
+
+  <button type="button" id="barra-movel" class="barra-movel r-semVenda" aria-label="Ver resultado e diagnóstico">
+    <span id="bm-rotulo">Escolha o caixa</span><strong id="bm-valor"></strong>
+  </button>
+  <div id="aviso" class="aviso" role="status" hidden></div>
+
+  <script src="perfil.js" onerror="void 0"></script>
+  <script src="calc.js"></script>
+  <script src="operador.js"></script>
+</body>
+</html>

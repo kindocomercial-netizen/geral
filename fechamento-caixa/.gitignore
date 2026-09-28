@@ -5,3 +5,5 @@ dados.js
 *.xlsm
 historico*.json
 backup-caixa-*.json
+perfil.js
+perfil.json

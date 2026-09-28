@@ -119,5 +119,212 @@
     };
   }
 
-  return { DENOMINACOES, FORMAS, paraCentavos, formatar, totalContagem, calcularCaixa, calcularDia, resumir };
+
+  // ---------- diagnóstico: onde pode estar a diferença ----------
+  const ROTULOS = {
+    sistema: 'Rel. caixa sistema', trocoInicial: 'Troco inicial', suprimento: 'Suprimento',
+    credito: 'Crédito à vista', creditoParcelado: 'Crédito parcelado', debito: 'Débito', pix: 'PIX',
+    trocoFinal: 'Troco final', despesas: 'Despesas', valeTransporte: 'Vale transporte',
+  };
+  const LADO_SISTEMA = ['sistema', 'trocoInicial', 'suprimento'];
+  const PESO = { alta: 3, media: 2, baixa: 1 };
+
+  // Todos os valores digitados, com o lado da conta em que entram.
+  function valoresDigitados(c) {
+    const lista = [];
+    for (const k of Object.keys(ROTULOS)) if (c[k]) lista.push({ campo: k, rotulo: ROTULOS[k], valor: c[k], sistema: LADO_SISTEMA.includes(k) });
+    (c.sangrias || []).forEach((v, i) => v && lista.push({ campo: 'sangrias', indice: i, rotulo: `Sangria ${i + 1}`, valor: v, sistema: false }));
+    (c.outros || []).forEach((o, i) => o?.valor && lista.push({ campo: 'outros', indice: i, rotulo: o.desc || `Outro recebimento ${i + 1}`, valor: o.valor, sistema: false }));
+    return lista;
+  }
+
+  // Valores que a pessoa pode ter querido digitar no lugar de v.
+  function trocasDeDigito(v) {
+    const s = String(Math.abs(v));
+    const out = [];
+    for (let i = 0; i < s.length - 1; i++) {
+      if (s[i] === s[i + 1]) continue;
+      const w = s.slice(0, i) + s[i + 1] + s[i] + s.slice(i + 2);
+      out.push({ valor: Number(w), tipo: 'inversao' });
+    }
+    out.push({ valor: v * 10, tipo: 'zero' });
+    if (v % 10 === 0) out.push({ valor: v / 10, tipo: 'zero' });
+    return out;
+  }
+
+  // c: caixa (centavos). ctx: { tolerancia, trocoOntem: {valor, data}, difOntem: {data, diferenca},
+  //   outrosCaixas: [{caixa, diferenca}] do mesmo dia, perfil: perfil do caixa }
+  // perfil: { formas: {credito: {mediana, p95}, ...} (fração do sistema), difP90 (centavos) }
+  function diagnosticar(c, ctx = {}) {
+    const tol = ctx.tolerancia ?? 200;
+    const perfil = ctx.perfil || null;
+    const r = calcularCaixa(c, tol);
+    const d = r.diferenca;
+    const limite = Math.max(2000, perfil?.difP90 || 0);
+    // Aceita um resíduo de até a tolerância (sempre sobram alguns centavos).
+    const perto = (a, b) => Math.abs(a - b) <= Math.max(2, tol);
+    const exato = (a, b) => Math.abs(a - b) <= 10; // até 10 centavos: bate quase certinho
+    const dicas = [];
+    const add = (confianca, titulo, detalhe, campo) => dicas.push({ confianca, titulo, detalhe, campo });
+
+    if (r.status === 'semVenda') return { nivel: 'semVenda', diferenca: 0, limite, dicas };
+    if (r.status === 'pendente') {
+      add('alta', 'A gaveta está em branco', 'O relatório do sistema foi lançado, mas nenhum valor da gaveta (cartões, PIX, troco final, sangrias).');
+      return { nivel: 'pendente', diferenca: d, limite, dicas };
+    }
+
+    // Troco inicial x troco final do fechamento anterior (vale mesmo sem diferença)
+    const ontem = ctx.trocoOntem;
+    if (ontem && ontem.valor != null && c.trocoInicial !== ontem.valor) {
+      const delta = (c.trocoInicial || 0) - ontem.valor;
+      const resolve = Math.abs(d) > tol && perto(d + delta, 0);
+      add(resolve ? 'alta' : 'baixa', 'Troco inicial diferente do último fechamento',
+        `Foi lançado ${formatar(c.trocoInicial || 0)}, mas este caixa fechou em ${ontem.data ? ontem.data.split('-').reverse().join('/') : 'o último dia'} com ${formatar(ontem.valor)}.` +
+        (resolve ? ' Com o troco do dia anterior, o caixa fecharia certinho.' : ''), 'trocoInicial');
+    }
+
+    if (Math.abs(d) <= tol) {
+      dicas.sort((a, b) => PESO[b.confianca] - PESO[a.confianca]);
+      return { nivel: 'ok', diferenca: d, limite, dicas };
+    }
+
+    const falta = d < 0, abs = Math.abs(d);
+    const valores = valoresDigitados(c);
+
+    // 1. Um valor lançado igual à diferença: em dobro, de outro caixa, ou não entrou na gaveta
+    for (const v of valores) {
+      if (!perto(v.valor, abs)) continue;
+      if (!falta && !v.sistema) {
+        add('alta', `${v.rotulo} tem o mesmo valor da sobra`,
+          v.campo === 'sangrias' ? `Essa sangria de ${formatar(v.valor)} pode ter sido lançada duas vezes.`
+            : `${formatar(v.valor)} pode ter sido lançado em dobro, ou ser de outro caixa ou de outro dia.`, v.campo);
+      } else if (falta && v.sistema && v.campo !== 'sistema') {
+        add('alta', `${v.rotulo} tem o mesmo valor da falta`,
+          v.campo === 'suprimento' ? `Confira se o reforço de ${formatar(v.valor)} entrou mesmo na gaveta.`
+            : `Confira se o troco inicial de ${formatar(v.valor)} estava na gaveta ou se foi retirado sem registro.`, v.campo);
+      }
+    }
+
+    // 2. Erro de digitação: dígitos invertidos ou zero a mais/a menos
+    for (const v of valores) {
+      for (const alt of trocasDeDigito(v.valor)) {
+        const efeito = v.sistema ? -(alt.valor - v.valor) : alt.valor - v.valor; // mudança na diferença
+        if (!perto(d + efeito, 0)) continue;
+        add(exato(d + efeito, 0) ? 'alta' : 'media', `Possível erro de digitação em ${v.rotulo}`,
+          `Foi lançado ${formatar(v.valor)}. Se o certo for ${formatar(alt.valor)}` +
+          (alt.tipo === 'inversao' ? ' (dois números trocados de lugar)' : ' (um zero a mais ou a menos)') + ', o caixa fecha.', v.campo);
+      }
+    }
+
+    // 3. Forma de pagamento zerada que normalmente aparece (só em falta)
+    if (falta && perfil?.formas && c.sistema) {
+      for (const f of FORMAS) {
+        if (c[f.id]) continue;
+        const p = perfil.formas[f.id];
+        if (!p || p.mediana < 0.03) continue;
+        const esperado = p.mediana * c.sistema;
+        const plausivel = abs >= esperado * 0.35 && abs <= Math.max(esperado * 2.5, (p.p95 || 0) * c.sistema);
+        add(plausivel ? 'media' : 'baixa', `${f.nome} está zerado`,
+          `Neste caixa, ${f.nome.toLowerCase()} costuma ser ${Math.round(p.mediana * 100)}% das vendas (perto de ${formatar(Math.round(esperado))} hoje). ` +
+          (f.id === 'pix' ? 'Confira o extrato do PIX.' : 'Confira o fechamento de lote da maquininha.'), f.id);
+      }
+    }
+
+    // 4. Forma de pagamento muito acima do normal (só em sobra)
+    if (!falta && perfil?.formas && c.sistema) {
+      for (const f of FORMAS) {
+        const p = perfil.formas[f.id];
+        if (!c[f.id] || !p?.p95) continue;
+        const parte = c[f.id] / c.sistema;
+        if (parte > p.p95 * 1.25 && parte - p.mediana > 0.1) {
+          add('media', `${f.nome} acima do normal`,
+            `${f.nome} ficou em ${Math.round(parte * 100)}% das vendas; o normal deste caixa é até ${Math.round(p.p95 * 100)}%. Pode ter entrado o valor de outro caixa ou do dia todo da maquininha.`, f.id);
+        }
+      }
+    }
+
+    // 5a. Diferença que se desfaz com a do fechamento anterior do mesmo caixa
+    const ant = ctx.difOntem;
+    if (ant && Math.abs(ant.diferenca) > tol && Math.sign(ant.diferenca) !== Math.sign(d) &&
+        Math.abs(d + ant.diferenca) <= Math.max(tol, abs * 0.1)) {
+      add('media', 'Compensa a diferença do fechamento anterior',
+        `Em ${ant.data.split('-').reverse().join('/')} este caixa fechou com ${formatar(ant.diferenca)}. ` +
+        'Pode ser dinheiro, sangria ou comprovante de um dia contado no outro.');
+    }
+
+    // 5b. Diferença que se compensa com outro caixa no mesmo dia
+    for (const o of ctx.outrosCaixas || []) {
+      if (Math.abs(o.diferenca) <= tol || Math.sign(o.diferenca) === Math.sign(d)) continue;
+      if (Math.abs(d + o.diferenca) <= Math.max(tol, abs * 0.1)) {
+        add('media', `Compensa a diferença do Caixa ${o.caixa}`,
+          `Hoje o Caixa ${o.caixa} está com ${formatar(o.diferenca)}. Pode ser uma venda, sangria ou comprovante lançado no caixa errado.`);
+      }
+    }
+
+    // 5. Diferença redonda: cédula ou sangria
+    const REDONDOS = [20000, 10000, 5000, 2000, 1000, 500, 200];
+    const multiplo = Math.round(abs / 5000) * 5000;
+    if (falta && multiplo >= 5000 && perto(abs, multiplo)) {
+      add('media', 'Falta em valor redondo', `Sangrias costumam ser redondas. Confira se alguma retirada de ${formatar(multiplo)} ficou sem lançamento ou sem recibo.`, 'sangrias');
+    }
+    const nota = REDONDOS.find((n) => perto(abs, n));
+    if (nota) {
+      add('media', `Diferença de exatamente uma cédula de ${formatar(nota)}`,
+        falta ? 'Pode ser troco dado a mais ou uma nota contada a mais na abertura. Reconte a gaveta separando as notas.'
+          : 'Pode ser troco dado a menos ou uma nota contada duas vezes. Reconte a gaveta separando as notas.', 'trocoFinal');
+    }
+
+    // 6. Tamanho da diferença em relação ao histórico do caixa
+    if (abs > limite) {
+      add('baixa', 'Diferença bem acima do normal',
+        `9 de cada 10 fechamentos deste caixa ficam até ${formatar(limite)}.` +
+        (dicas.length ? '' : falta
+          ? ' Confira: recontagem da gaveta, comprovantes da maquininha contra os valores lançados, recibos de sangria e cancelamentos no sistema.'
+          : ' Confira: venda feita sem registrar no sistema, troco dado a menos, PIX ou cartão de outro caixa.'));
+    } else if (!dicas.length) {
+      add('baixa', falta ? 'Nenhuma causa óbvia para a falta' : 'Nenhuma causa óbvia para a sobra',
+        falta ? 'Reconte a gaveta e confira os comprovantes da maquininha contra os valores lançados.'
+          : 'Confira se houve venda sem registro no sistema ou troco dado a menos.');
+    }
+
+    // remove repetidas (mesmo título) e ordena por confiança
+    const vistos = new Set();
+    const unicas = dicas.filter((x) => (vistos.has(x.titulo) ? false : vistos.add(x.titulo)));
+    unicas.sort((a, b) => PESO[b.confianca] - PESO[a.confianca]);
+    return { nivel: abs > limite ? 'grave' : 'atencao', diferenca: d, limite, dicas: unicas };
+  }
+
+  // Perfil "normal" de cada caixa a partir do histórico: participação de cada
+  // forma de pagamento nas vendas, tamanho típico da diferença e último troco final.
+  function montarPerfil(dias, tolerancia = 200) {
+    const q = (lista, p) => {
+      if (!lista.length) return 0;
+      const o = [...lista].sort((a, b) => a - b);
+      return o[Math.min(o.length - 1, Math.floor(p * (o.length - 1) + 0.5))];
+    };
+    const base = {};
+    for (const dia of [...dias].sort((a, b) => a.data.localeCompare(b.data))) {
+      for (const c of dia.caixas || []) {
+        const b = (base[c.caixa] ??= { partes: {}, difs: [], ultimoTroco: null, fechamentos: 0 });
+        const r = calcularCaixa(c, tolerancia);
+        if (c.trocoFinal || c.trocoInicial) b.ultimoTroco = { data: dia.data, valor: c.trocoFinal || c.trocoInicial };
+        if (!['ok', 'falta', 'sobra'].includes(r.status) || !c.sistema) continue;
+        b.fechamentos++;
+        b.difs.push(Math.abs(r.diferenca));
+        for (const f of FORMAS) (b.partes[f.id] ??= []).push((c[f.id] || 0) / c.sistema);
+      }
+    }
+    const caixas = {};
+    for (const [n, b] of Object.entries(base)) {
+      const formas = {};
+      for (const f of FORMAS) {
+        const l = b.partes[f.id] || [];
+        formas[f.id] = { mediana: +q(l, 0.5).toFixed(4), p95: +q(l, 0.95).toFixed(4) };
+      }
+      caixas[n] = { fechamentos: b.fechamentos, difP50: q(b.difs, 0.5), difP90: q(b.difs, 0.9), formas, ultimoTroco: b.ultimoTroco };
+    }
+    return { caixas };
+  }
+
+  return { montarPerfil, diagnosticar, DENOMINACOES, FORMAS, paraCentavos, formatar, totalContagem, calcularCaixa, calcularDia, resumir };
 });

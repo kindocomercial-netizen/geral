@@ -72,3 +72,80 @@ test('resumir ignora pendentes e soma diferenças por caixa', () => {
   assert.equal(s.ocorrencias[0].diferenca, -427);
   assert.equal(s.mix.pix, 62762 * 2);
 });
+
+// ---------- diagnóstico ----------
+const perfil = {
+  formas: {
+    credito: { mediana: 0.3, p95: 0.5 }, creditoParcelado: { mediana: 0, p95: 0.2 },
+    debito: { mediana: 0.33, p95: 0.5 }, pix: { mediana: 0.12, p95: 0.25 },
+  },
+  difP90: 3000,
+};
+const titulos = (r) => r.dicas.map((d) => d.titulo);
+
+test('diagnóstico: caixa que fecha não gera alerta', () => {
+  const r = C.diagnosticar(cx1_0106, { perfil });
+  assert.equal(r.nivel, 'ok');
+  assert.equal(r.dicas.length, 0);
+});
+
+test('diagnóstico: sangria lançada duas vezes', () => {
+  const r = C.diagnosticar({ ...cx1_0106, sangrias: [90000, 60000, 60000] }, { perfil });
+  assert.equal(r.nivel, 'grave');
+  assert.equal(r.dicas[0].confianca, 'alta');
+  assert.match(r.dicas[0].detalhe, /duas vezes/);
+});
+
+test('diagnóstico: dígitos invertidos no débito', () => {
+  // 1.251,12 digitado como 1.215,12
+  const r = C.diagnosticar({ ...cx1_0106, debito: 121512 }, { perfil });
+  assert.ok(titulos(r).includes('Possível erro de digitação em Débito'));
+  assert.match(r.dicas.find((d) => d.campo === 'debito').detalhe, /1\.251,12/);
+});
+
+test('diagnóstico: zero a mais no relatório do sistema', () => {
+  const r = C.diagnosticar({ ...cx1_0106, sistema: 3703260 }, { perfil });
+  assert.ok(titulos(r).includes('Possível erro de digitação em Rel. caixa sistema'));
+});
+
+test('diagnóstico: PIX esquecido', () => {
+  const r = C.diagnosticar({ ...cx1_0106, pix: 0 }, { perfil });
+  const pix = r.dicas.find((d) => d.campo === 'pix');
+  assert.equal(pix.confianca, 'media');
+  assert.match(pix.titulo, /PIX está zerado/);
+});
+
+test('diagnóstico: troco inicial errado explica a diferença', () => {
+  const r = C.diagnosticar({ ...cx1_0106, trocoInicial: 106655 }, { perfil, trocoOntem: { data: '2026-05-28', valor: 96655 } });
+  assert.equal(r.dicas[0].titulo, 'Troco inicial diferente do último fechamento');
+  assert.equal(r.dicas[0].confianca, 'alta');
+});
+
+test('diagnóstico: falta de uma nota de R$ 50', () => {
+  const r = C.diagnosticar({ ...cx1_0106, trocoFinal: 58480 - 5053 }, { perfil });
+  assert.equal(r.diferenca, -5000);
+  assert.ok(titulos(r).some((t) => t.includes('cédula de R$ 50,00')));
+  assert.ok(titulos(r).includes('Falta em valor redondo'));
+});
+
+test('diagnóstico: gaveta em branco', () => {
+  assert.equal(C.diagnosticar({ caixa: 1, sistema: 483028 }).nivel, 'pendente');
+});
+
+test('montarPerfil calcula participação e último troco', () => {
+  const p = C.montarPerfil([
+    { data: '2026-06-01', caixas: [cx1_0106] },
+    { data: '2026-06-02', caixas: [{ ...cx1_0106, trocoFinal: 58000 }] },
+  ]);
+  assert.equal(p.caixas[1].fechamentos, 2);
+  assert.equal(p.caixas[1].ultimoTroco.valor, 58000);
+  assert.ok(Math.abs(p.caixas[1].formas.pix.mediana - 62762 / 370326) < 0.001);
+  assert.equal(p.caixas[1].difP90, 427);
+});
+
+test('diagnóstico: diferença que se desfaz com a de ontem ou com outro caixa', () => {
+  const hoje = { ...cx1_0106, trocoFinal: 58480 + 10000 };
+  const r = C.diagnosticar(hoje, { perfil, difOntem: { data: '2026-05-30', diferenca: -9950 }, outrosCaixas: [{ caixa: 2, diferenca: -10020 }] });
+  assert.ok(titulos(r).includes('Compensa a diferença do fechamento anterior'));
+  assert.ok(titulos(r).includes('Compensa a diferença do Caixa 2'));
+});
