@@ -170,7 +170,7 @@
     const card = $('#res-card');
     const rotulo = {
       ok: 'Caixa confere', atencao: r.diferenca < 0 ? 'Falta' : 'Sobra',
-      grave: r.diferenca < 0 ? 'Falta alta: confira antes de enviar' : 'Sobra alta: confira antes de enviar',
+      grave: r.diferenca < 0 ? 'Falta alta' : 'Sobra alta',
       pendente: 'Gaveta não lançada', semVenda: caixa ? 'Sem venda lançada' : 'Escolha o caixa',
     }[dg.nivel];
     card.className = 'res-card r-' + ({ ok: 'ok', atencao: 'atencao', grave: 'grave', pendente: 'pendente', semVenda: 'semVenda' }[dg.nivel]);
@@ -192,7 +192,7 @@
     const grave = dg.nivel === 'grave';
     $('#bloco-just').hidden = !(grave || dg.nivel === 'atencao');
     $('#just-aviso').textContent = grave
-      ? `A diferença passou de ${formatar(dg.limite)}, acima do normal deste caixa. Para enviar, marque a recontagem e explique o que aconteceu.`
+      ? `A diferença passou de ${formatar(dg.limite)}, acima do normal deste caixa. Se puder, reconte e explique o que aconteceu (não é obrigatório).`
       : 'Se souber o motivo da diferença, escreva aqui.';
     validarEnvio();
   }
@@ -204,12 +204,10 @@
     if (!caixa) faltas.push('o caixa');
     if (!dataSel()) faltas.push('a data');
     if (ultimoDiag?.nivel === 'pendente') faltas.push('os valores da gaveta');
-    if (ultimoDiag?.nivel === 'grave') {
-      if (!$('#f-recontado').checked) faltas.push('confirmar a recontagem');
-      if ($('#f-just').value.trim().length < 10) faltas.push('explicar a diferença');
-    }
     $('#btn-enviar').disabled = faltas.length > 0;
-    $('#enviar-nota').textContent = faltas.length ? 'Falta: ' + faltas.join(', ') + '.' : existente ? 'Vai substituir o envio anterior deste caixa.' : '';
+    const semMotivo = ultimoDiag?.nivel === 'grave' && !$('#f-just').value.trim();
+    $('#enviar-nota').textContent = faltas.length ? 'Falta: ' + faltas.join(', ') + '.'
+      : [semMotivo ? 'Diferença alta sem explicação: dá para enviar, mas o gerente vai ver.' : '', existente ? 'Vai substituir o envio anterior deste caixa.' : ''].filter(Boolean).join(' ');
   }
 
   function guardarRascunho() {

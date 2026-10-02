@@ -32,7 +32,7 @@ Cada operador lança o fechamento do próprio caixa no fim do dia, pelo celular 
 - Escolhe a data, o caixa e escreve o nome. O troco inicial já vem com o troco final do último fechamento daquele caixa.
 - A diferença aparece enquanto digita. No celular, uma barra fixa no rodapé mostra o valor.
 - Quando a diferença passa da tolerância, a página lista **onde pode estar o problema**, da pista mais provável para a menos provável, com um botão que leva ao campo.
-- Se a diferença for maior que 9 de cada 10 fechamentos daquele caixa (mínimo de R$ 20), o envio só é liberado depois de marcar "Recontei a gaveta" e explicar o que aconteceu.
+- Se a diferença for maior que 9 de cada 10 fechamentos daquele caixa (mínimo de R$ 20), a página pede para recontar e explicar o que aconteceu, mas o envio é liberado mesmo sem justificativa.
 - Reenviar o mesmo caixa e dia substitui o lançamento, mas os envios anteriores ficam registrados (quem, quando e qual diferença).
 - A aba **Conferência** mostra os envios por dia, com diferença, justificativa e as pistas encontradas.
 - O que já foi digitado fica guardado no aparelho se a página fechar antes do envio.
