@@ -20,6 +20,7 @@
     </div>
     <nav aria-label="Seções">
       <button class="aba ativa" data-aba="lancar" id="aba-btn-lancar">Lançar</button>
+      <button class="aba" data-aba="calendario" id="aba-btn-calendario">Calendário</button>
       <button class="aba" data-aba="conferir" id="aba-btn-conferir">Conferência</button>
     </nav>
   </header>
@@ -96,6 +97,24 @@
     </section>
 
     <!-- CONFERÊNCIA -->
+    <section id="aba-calendario" class="painel" hidden>
+      <div class="barra-filtros">
+        <button type="button" id="cal-ant" aria-label="Mês anterior">‹</button>
+        <input type="month" id="cal-mes" aria-label="Mês">
+        <button type="button" id="cal-prox" aria-label="Próximo mês">›</button>
+      </div>
+      <div id="cal-kpis" class="kpis"></div>
+      <div class="legenda-status">
+        <span class="st st-ok">confere</span>
+        <span class="st st-falta">falta</span>
+        <span class="st st-sobra">sobra</span>
+        <span class="st st-semVenda">sem venda</span>
+        <span class="st st-pendente">não enviado</span>
+      </div>
+      <div class="rolagem"><div id="calendario" class="calendario"></div></div>
+      <p class="nota">Toque num caixa para abrir o envio. Dias sem nenhum envio aparecem em branco.</p>
+    </section>
+
     <section id="aba-conferir" class="painel" hidden>
       <div class="barra-filtros">
         <label>Mostrar

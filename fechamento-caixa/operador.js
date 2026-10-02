@@ -371,10 +371,84 @@
     renderHoje();
   });
 
+
+  // ---------- calendário do mês ----------
+  const mesCal = () => $('#cal-mes').value || hoje().slice(0, 7);
+  function renderCalendario() {
+    const mes = mesCal();
+    const [a, m] = mes.split('-').map(Number);
+    const tol = loja.tolerancia;
+    const doMes = registros.filter((r) => r.data.startsWith(mes));
+    const porDia = {};
+    doMes.forEach((r) => ((porDia[r.data] ??= {})[r.caixa] = r));
+
+    // resumo do mês
+    const fora = doMes.filter((r) => r.status !== 'semVenda' && Math.abs(r.diferenca) > tol);
+    const faltas = fora.filter((r) => r.diferenca < 0), sobras = fora.filter((r) => r.diferenca > 0);
+    const soma = (l) => l.reduce((t, r) => t + r.diferenca, 0);
+    const liquido = doMes.filter((r) => r.status !== 'semVenda').reduce((t, r) => t + r.diferenca, 0);
+    const porCaixa = Array.from({ length: loja.qtdCaixas }, (_, i) => i + 1).map((n) => {
+      const l = doMes.filter((r) => r.caixa === n && r.status !== 'semVenda');
+      return { n, total: l.reduce((t, r) => t + r.diferenca, 0), envios: l.length };
+    });
+    $('#cal-kpis').innerHTML = `
+      <div class="kpi"><span>Faltas no mês</span><strong class="neg">${formatar(soma(faltas))}</strong><small>${faltas.length} ${faltas.length === 1 ? 'fechamento' : 'fechamentos'} acima de ${formatar(tol)}</small></div>
+      <div class="kpi"><span>Sobras no mês</span><strong class="pos">${formatar(soma(sobras))}</strong><small>${sobras.length} ${sobras.length === 1 ? 'fechamento' : 'fechamentos'}</small></div>
+      <div class="kpi"><span>Saldo do mês</span><strong class="${liquido < 0 ? 'neg' : liquido > 0 ? 'pos' : ''}">${sinal(liquido)}</strong><small>${doMes.length} envios</small></div>
+      <div class="kpi"><span>Por caixa</span><small>${porCaixa.map((c) => `Caixa ${c.n}: <b class="${c.total < 0 ? 'neg' : c.total > 0 ? 'pos' : ''}">${sinal(c.total)}</b> (${c.envios})`).join('<br>')}</small></div>`;
+
+    // grade seg–sáb (domingo só se houver envio)
+    const temDomingo = doMes.some((r) => dataObj(r.data).getDay() === 0);
+    const cols = temDomingo ? [0, 1, 2, 3, 4, 5, 6] : [1, 2, 3, 4, 5, 6];
+    const el = $('#calendario');
+    el.style.setProperty('--cols', cols.length);
+    let html = cols.map((c) => `<div class="cal-cab">${DIAS[c].slice(0, 3)}</div>`).join('');
+    const ultimo = new Date(a, m, 0).getDate();
+    let primeiro = true;
+    const hj = hoje();
+    for (let d = 1; d <= ultimo; d++) {
+      const iso = `${mes}-${String(d).padStart(2, '0')}`;
+      const pos = cols.indexOf(dataObj(iso).getDay());
+      if (pos < 0) continue;
+      if (primeiro) { html += '<div class="cal-dia fora"></div>'.repeat(pos); primeiro = false; }
+      const envios = porDia[iso];
+      if (!envios) { html += `<div class="cal-dia vazio"><span class="cal-num">${d}</span></div>`; continue; }
+      const linhas = Array.from({ length: loja.qtdCaixas }, (_, i) => i + 1).map((n) => {
+        const r = envios[n];
+        if (!r) return `<span class="cal-cx st-pendente"><span>cx${n}</span><span>${iso < hj ? 'não enviou' : '—'}</span></span>`;
+        const st = r.status === 'semVenda' ? 'semVenda' : Math.abs(r.diferenca) <= tol ? 'ok' : r.diferenca < 0 ? 'falta' : 'sobra';
+        return `<button type="button" class="cal-cx st-${st}" data-abrir="${r.data}|${r.caixa}" title="${esc(r.operador || '')}"><span>cx${n}</span><span>${st === 'semVenda' ? 'sem venda' : sinal(r.diferenca)}</span></button>`;
+      }).join('');
+      const totalDia = Object.values(envios).filter((r) => r.status !== 'semVenda').reduce((t, r) => t + r.diferenca, 0);
+      html += `<div class="cal-dia"><span class="cal-num">${d}<small class="${totalDia < -tol ? 'neg' : totalDia > tol ? 'pos' : ''}">${sinal(totalDia)}</small></span>${linhas}</div>`;
+    }
+    el.innerHTML = html;
+  }
+  $('#cal-mes').addEventListener('change', renderCalendario);
+  const moverMes = (k) => {
+    const [a, m] = mesCal().split('-').map(Number);
+    const d = new Date(a, m - 1 + k, 1);
+    $('#cal-mes').value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    renderCalendario();
+  };
+  $('#cal-ant').onclick = () => moverMes(-1);
+  $('#cal-prox').onclick = () => moverMes(1);
+  $('#calendario').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-abrir]');
+    if (!b) return;
+    const [data, n] = b.dataset.abrir.split('|');
+    $('#f-data').value = data;
+    renderCaixas();
+    trocarAba('lancar');
+    escolherCaixa(+n);
+    renderHoje();
+  });
+
   function render() {
     renderCaixas();
     renderHoje();
     if (!$('#aba-conferir').hidden) renderConferencia();
+    if (!$('#aba-calendario').hidden) renderCalendario();
     // Atualiza o aviso de envio existente sem apagar o que a pessoa está digitando.
     if (caixa) {
       existente = registros.find((r) => r.id === idDoc(dataSel(), caixa)) || null;
@@ -387,6 +461,7 @@
     $$('.painel').forEach((p) => (p.hidden = p.id !== 'aba-' + nome));
     $('#barra-movel').hidden = nome !== 'lancar';
     if (nome === 'conferir') renderConferencia();
+    if (nome === 'calendario') renderCalendario();
     window.scrollTo(0, 0);
   }
   $$('.aba').forEach((b) => (b.onclick = () => trocarAba(b.dataset.aba)));
@@ -397,6 +472,8 @@
   renderCaixas();
   renderHoje();
   atualizar();
+  $('#cal-mes').value = hoje().slice(0, 7);
   if (location.hash === '#conferir') trocarAba('conferir');
+  if (location.hash === '#calendario') trocarAba('calendario');
   conectar();
 })();

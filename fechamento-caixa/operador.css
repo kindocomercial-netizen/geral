@@ -79,3 +79,8 @@ legend { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transfo
   main { padding-bottom: 96px; }
   .aviso { bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
 }
+
+/* calendário: caixas clicáveis */
+button.cal-cx { border: 0; width: 100%; cursor: pointer; font-weight: 400; }
+button.cal-cx:hover { outline: 1px solid currentColor; }
+#cal-kpis .kpi small b { font-family: var(--numeros); font-weight: 600; }
