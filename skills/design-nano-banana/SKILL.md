@@ -30,17 +30,22 @@ gerar de novo (e sem gastar crédito).
 4. Se o pedido for editar um design que já existe: `canvas_read` primeiro
    (é o que cria os ids `n…`/`p_…` usados por todas as outras ferramentas).
 
-## Identidade Kindo (quando não houver brand kit)
+## Identidade Kindo
 
-- Cores: plum `#3A1238`, magenta `#D6246E`, lilás `#EADCF4`, manteiga `#FFE45C`.
-- Fonte: Bricolage Grotesque (Google Fonts). Títulos peso 800, corpo 600.
+O brand kit "Kindo Cosméticos" (`brand_list`) manda quando existe: cores
+Rosa Kindo `#E5007E`, Ameixa `#9A3D80`, Rosa claro `#FCE4F1` (fundo), Texto
+escuro `#3A1A33`, branco; títulos em Gilda Display 400, corpo em Figtree.
+Confirme com `brand_show`, pois o kit pode mudar. Sem kit, use a paleta da
+campanha: plum `#3A1238`, magenta `#D6246E`, lilás `#EADCF4`, manteiga
+`#FFE45C`, fonte Bricolage Grotesque (títulos 800, corpo 600).
+
 - Assinatura `@kindoperfumaria` no rodapé.
 - Preço em `R$ 00,00`; em cartaz, o preço POR é o maior elemento da página.
 - Campanha "Segunda do Preço de Custo": etiqueta de preço com furo, magenta
   no título e manteiga nos preços. Detalhes na skill `segunda-preco-de-custo`.
 
-Use essas cores no prompt da imagem também (luz lilás, fundo plum, detalhe
-dourado/manteiga) para a foto gerada conversar com a tipografia.
+Use as cores do kit no prompt da imagem também (fundo rosa claro, luz
+rosa/ameixa, detalhe branco) para a foto gerada conversar com a tipografia.
 
 ## Tamanhos
 
