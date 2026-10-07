@@ -14,30 +14,28 @@ quando o robô manda uma **COMANDA KINDO** (pedido fechado para separar).
 Fora do horário (seg–sáb, 8h30–17h) fica quieto. Quando a loja abre, avisa quem
 pediu vendedora com a loja fechada e ainda não foi respondido.
 
-## O que precisa
+## Instalação rápida (Windows)
 
-- Um computador da loja ligado no horário de atendimento (Windows), com a caixa de som conectada.
-- Python 3: <https://www.python.org/downloads/>. Na instalação, marque **"Add Python to PATH"**.
-- Chave de API do LetsBot (o plano tem API incluída).
-- Conta grátis no **Voice Monkey** (200 avisos/mês grátis).
+1. **Voice Monkey (para a Alexa falar)**: entre em <https://voicemonkey.io> com a mesma conta
+   Amazon da Echo da loja, ative a skill **Voice Monkey** no app Alexa, crie um **Speaker**
+   chamado `loja` escolhendo a Echo e copie o **token** em *API*. (Pode pular e fazer depois:
+   sem ele só a caixa do computador toca.)
+2. **Chave do LetsBot**: painel LetsBot → Configurações → **API** → copiar a chave.
+3. Extraia o `chamador.zip` numa pasta fixa, por exemplo `Documentos\chamador`.
+   (Não rode de dentro do zip nem da pasta Downloads.)
+4. Dê dois cliques em **`instalar.bat`**. Ele:
+   - instala o Python se precisar;
+   - pede a chave do LetsBot e o token do Voice Monkey;
+   - testa a leitura do WhatsApp e toca um aviso de teste;
+   - deixa o Chamador abrindo sozinho quando o computador liga;
+   - liga o Chamador numa janela minimizada (não feche essa janela).
 
-## Passo a passo
+Se o Windows mostrar "O Windows protegeu o computador", clique em **Mais informações → Executar assim mesmo**.
 
-### 1. Voice Monkey (faz a Alexa falar)
-1. Entre em <https://voicemonkey.io> com a mesma conta Amazon da Alexa da loja.
-2. No app Alexa, ative a skill **Voice Monkey**.
-3. No painel do Voice Monkey, crie um **Speaker** chamado `loja` e escolha a Echo da loja.
-4. Em **API**, copie o **token**.
+Para mudar as chaves depois: rode `instalar.bat` de novo ou edite o `config.ini`.
+Para desligar de vez: apague o atalho "Chamador Kindo" em `Win + R` → `shell:startup`.
 
-### 2. Chave do LetsBot
-Painel LetsBot → Configurações → **API** → gerar/copiar a chave.
-
-### 3. Configurar
-1. Copie a pasta `chamador` para o computador da loja.
-2. Copie `config.exemplo.ini` para `config.ini` e cole o token do Voice Monkey e a chave do LetsBot.
-
-### 4. Testar
-Abra o Prompt de Comando na pasta e rode:
+## Comandos (Prompt de Comando, dentro da pasta)
 
 ```
 python chamador.py falar     (a Alexa e a caixa do computador devem falar)
@@ -45,7 +43,3 @@ python chamador.py testar    (lista as chamadas do robô dos últimos 3 dias e q
 ```
 
 Se o `testar` der erro, mande um print da tela para o Claude.
-
-### 5. Deixar ligado sempre
-Dê dois cliques em `iniciar.bat`. Para abrir sozinho quando o computador ligar:
-`Win + R` → `shell:startup` → coloque ali um atalho para o `iniciar.bat`.

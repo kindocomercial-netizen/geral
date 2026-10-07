@@ -62,7 +62,7 @@ def carregar_config():
     if not os.path.exists(ARQ_CONFIG):
         sys.exit("Falta o config.ini. Copie config.exemplo.ini para config.ini e preencha.")
     cp = configparser.ConfigParser(interpolation=None)
-    cp.read(ARQ_CONFIG, encoding="utf-8")
+    cp.read(ARQ_CONFIG, encoding="utf-8-sig")
     c = {
         "lb_chave": cp.get("letsbot", "chave_api", fallback="").strip(),
         "lb_base": cp.get("letsbot", "endereco", fallback="https://letsbot.net/api/v1").rstrip("/"),
@@ -374,9 +374,40 @@ def testar(c):
         print("  -", nome_falado(ch["nome"], f), "desde", (ch["desde"] or "")[:16])
 
 
+def configurar():
+    """Pergunta as chaves e grava o config.ini a partir do config.exemplo.ini."""
+    print("Configuração do Chamador Kindo\n")
+    chave = ""
+    while not chave:
+        chave = input("Cole a chave de API do LetsBot e aperte Enter: ").strip()
+    token = input("Cole o token do Voice Monkey (Enter para pular, se ainda não tem): ").strip()
+    device = ""
+    if token:
+        device = input("Nome do Speaker no Voice Monkey [loja]: ").strip() or "loja"
+    with open(os.path.join(PASTA, "config.exemplo.ini"), encoding="utf-8") as f:
+        linhas = f.read().splitlines()
+    valores = {"chave_api": chave, "token_voice_monkey": token, "dispositivo": device or "loja"}
+    saida = []
+    for linha in linhas:
+        nome = linha.split("=", 1)[0].strip()
+        if "=" in linha and not linha.lstrip().startswith(";") and nome in valores:
+            linha = f"{nome} = {valores[nome]}"
+        saida.append(linha)
+    with open(ARQ_CONFIG, "w", encoding="utf-8") as f:
+        f.write("\n".join(saida) + "\n")
+    print("\nconfig.ini salvo.")
+
+
 if __name__ == "__main__":
-    cfg = carregar_config()
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
+    if cmd == "configurar":
+        configurar()
+        sys.exit()
+    cfg = carregar_config()
     if cmd == "testar":
         testar(cfg)
     elif cmd == "falar":
