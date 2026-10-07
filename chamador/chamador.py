@@ -405,6 +405,19 @@ def configurar():
     chave = ""
     while not chave:
         chave = input("Cole a chave de API do LetsBot e aperte Enter: ").strip()
+        if chave and (" " in chave or len(chave) < 20):
+            print("Isso não parece a chave do LetsBot (ela é um código comprido, sem espaços). Tente de novo.")
+            chave = ""
+            continue
+        try:
+            pedir({"lb_base": "https://letsbot.net/api/v1", "lb_chave": chave}, "/chat/list", {})
+            print("Chave do LetsBot OK!")
+        except urllib.error.HTTPError as e:
+            if e.code in (401, 403):
+                print("O LetsBot recusou essa chave. Confira no painel (Configurações > API) e cole de novo.")
+                chave = ""
+        except (urllib.error.URLError, OSError) as e:
+            print(f"Não consegui testar a chave agora ({e}); vou seguir assim mesmo.")
     token = input("Cole o token do Voice Monkey (Enter para pular, se ainda não tem): ").strip()
     device = ""
     if token:
