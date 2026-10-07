@@ -7,8 +7,12 @@ confirmar"*, o chamador:
 1. faz a **Alexa** da loja falar: *"Atenção! Ana Lima precisa de uma vendedora no WhatsApp."*
 2. toca um **alarme na caixa ligada ao computador** e fala a mesma frase (Windows).
 
+Se ninguém da loja responder o cliente, repete o aviso depois de 5 minutos (até 2
+lembretes). Quando a atendente responde no WhatsApp, o chamado some sozinho. Também avisa
+quando o robô manda uma **COMANDA KINDO** (pedido fechado para separar).
+
 Fora do horário (seg–sáb, 8h30–17h) fica quieto. Quando a loja abre, avisa quem
-pediu vendedora com a loja fechada.
+pediu vendedora com a loja fechada e ainda não foi respondido.
 
 ## O que precisa
 
@@ -37,12 +41,10 @@ Abra o Prompt de Comando na pasta e rode:
 
 ```
 python chamador.py falar     (a Alexa e a caixa do computador devem falar)
-python chamador.py testar    (mostra as mensagens que o chamador está lendo do LetsBot)
+python chamador.py testar    (lista as chamadas do robô dos últimos 3 dias e quem ainda espera)
 ```
 
-No `testar`, as mensagens do robô que vão disparar aviso aparecem marcadas `CHAMADA ->`.
-Se aparecer erro ou "Nenhuma mensagem reconhecida", mande um print da tela para o Claude
-ajustar o leitor.
+Se o `testar` der erro, mande um print da tela para o Claude.
 
 ### 5. Deixar ligado sempre
 Dê dois cliques em `iniciar.bat`. Para abrir sozinho quando o computador ligar:
