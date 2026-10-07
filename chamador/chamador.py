@@ -19,7 +19,9 @@ import json
 import math
 import os
 import re
+import ssl
 import struct
+import subprocess
 import sys
 import tempfile
 import time
@@ -48,6 +50,15 @@ FRASES_IGNORAR = [
     r"avisei a vendedora que (você|vc) não",
     r"^nossas vendedoras atendem",
 ]
+
+# No Mac, o Python baixado do python.org não enxerga os certificados do sistema.
+_CTX = ssl.create_default_context(cafile="/etc/ssl/cert.pem") if (
+    sys.platform == "darwin" and os.path.exists("/etc/ssl/cert.pem")) else None
+
+
+def abrir(req, timeout):
+    return urllib.request.urlopen(req, timeout=timeout, context=_CTX)
+
 
 DIAS = {"seg": 0, "ter": 1, "qua": 2, "qui": 3, "sex": 4, "sab": 5, "sáb": 5, "dom": 6}
 
@@ -127,7 +138,7 @@ def pedir(c, caminho, params):
         "Authorization": "Bearer " + c["lb_chave"],
         "Accept": "application/json",
     })
-    with urllib.request.urlopen(req, timeout=30) as r:
+    with abrir(req, 30) as r:
         return json.loads(r.read().decode("utf-8"))
 
 
@@ -199,7 +210,7 @@ def falar_alexa(c, frase):
         params["voice"] = c["vm_voz"]
     url = "https://api-v3.voicemonkey.io/announce?" + urllib.parse.urlencode(params)
     try:
-        with urllib.request.urlopen(url, timeout=20) as r:
+        with abrir(url, 20) as r:
             log("Alexa: " + r.read().decode("utf-8", "replace")[:200])
     except urllib.error.URLError as e:
         log(f"Alexa falhou: {e}")
@@ -223,6 +234,19 @@ def _arquivo_alarme():
     return caminho
 
 
+def _voz_mac():
+    """Primeira voz em português do Brasil instalada no Mac (ex.: Luciana)."""
+    try:
+        vozes = subprocess.run(["say", "-v", "?"], capture_output=True, text=True).stdout
+    except OSError:
+        return None
+    for linha in vozes.splitlines():
+        m = re.match(r"(.+?)\s+pt[_-]BR", linha)
+        if m:
+            return m.group(1).strip()
+    return None
+
+
 def tocar_local(c, frase):
     if not c["som_local"]:
         return
@@ -232,7 +256,7 @@ def tocar_local(c, frase):
             import winsound
             winsound.PlaySound(wav, winsound.SND_FILENAME)
         elif sys.platform == "darwin":
-            os.system(f'afplay "{wav}"')
+            subprocess.run(["afplay", wav], check=False)
         else:
             os.system(f'aplay -q "{wav}" 2>/dev/null || paplay "{wav}" 2>/dev/null')
     if sys.platform.startswith("win"):
@@ -244,7 +268,8 @@ def tocar_local(c, frase):
             f"$s.Speak('{seguro}')\""
         )
     elif sys.platform == "darwin":
-        os.system(f'say "{frase}"')
+        voz = _voz_mac()
+        subprocess.run(["say"] + (["-v", voz] if voz else []) + [frase], check=False)
 
 
 def avisar(c, frase):
