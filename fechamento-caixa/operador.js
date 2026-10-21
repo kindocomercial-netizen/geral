@@ -37,7 +37,8 @@
     const db = window.claude?.use ? await window.claude.use('db').catch(() => null) : null;
     if (!db) {
       registros = lerLocal('registros', []);
-      $('#conexao').textContent = 'Modo local: os envios ficam só neste navegador';
+      $('#conexao').textContent = 'NÃO CONECTADO À LOJA: o que você enviar fica só neste computador. Entre na conta Claude da loja e recarregue a página.';
+      $('#conexao').classList.add('offline');
       render();
       return;
     }
@@ -45,10 +46,15 @@
       salvar: (id, corpo) => db.collection('fechamentos').doc(id).set(corpo),
     };
     $('#conexao').textContent = 'Envios compartilhados com a loja';
+    let pendentesVerificados = false;
     db.collection('fechamentos').orderBy('data', 'desc').limit(600).onSnapshot((snap) => {
       registros = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       render();
-    }, () => { $('#conexao').textContent = 'Sem conexão com os envios. Recarregue a página.'; });
+      if (!pendentesVerificados) { pendentesVerificados = true; enviarPendentes(); }
+    }, () => {
+      $('#conexao').textContent = 'Sem conexão com os envios. Recarregue a página.';
+      $('#conexao').classList.add('offline');
+    });
     try {
       const [p, l] = await Promise.all([db.doc('config/perfil').get(), db.doc('config/loja').get()]);
       if (p.exists) perfil = p.data();
@@ -65,6 +71,20 @@
         atualizar();
       }
     } catch {}
+  }
+
+  // Envios feitos em modo local (sem conexão) ficam neste navegador; quando a
+  // página volta a conectar, sobem para a loja os que ainda não existem lá.
+  async function enviarPendentes() {
+    const locais = lerLocal('registros', []);
+    if (!locais.length || !banco) return;
+    const faltam = locais.filter((l) => !registros.some((r) => r.id === l.id));
+    let ok = 0;
+    for (const { id, ...corpo } of faltam) {
+      try { await banco.salvar(id, { ...corpo, enviadoOffline: true }); ok++; } catch { return; }
+    }
+    apagarLocal('registros');
+    if (ok) avisar(`${ok} ${ok === 1 ? 'fechamento salvo' : 'fechamentos salvos'} só neste computador ${ok === 1 ? 'foi enviado' : 'foram enviados'} agora para a loja.`);
   }
 
   // ---------- estado do formulário ----------
@@ -306,7 +326,8 @@
         render();
       }
       apagarLocal(`rascunho:${id}`);
-      avisar(`Caixa ${caixa} de ${dataBR(data)} enviado.`);
+      avisar(banco ? `Caixa ${caixa} de ${dataBR(data)} enviado.`
+        : `ATENÇÃO: Caixa ${caixa} de ${dataBR(data)} NÃO chegou na loja — ficou salvo só neste computador. Entre na conta Claude da loja e recarregue; ele sobe sozinho.`);
       existente = { id, ...corpo };
       carregar();
     } catch (err) {
