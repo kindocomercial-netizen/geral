@@ -17,20 +17,7 @@ const foto = (p) => `/assets/produtos/${p.ean}.webp`;
 const temFoto = (p) => existsSync(`${raiz}public${foto(p)}`);
 const catNome = Object.fromEntries(categorias.map((c) => [c.id, c.nome]));
 
-const loja = [
-  ["corredor-da-loja", "Corredor da Kindo Cosméticos na Lapa"],
-  ["tinturas-coloracao", "Prateleira de tinturas e coloração para cabelo"],
-  ["cremes-para-pentear", "Cremes para pentear e finalizadores"],
-  ["shampoos-e-condicionadores", "Shampoos e condicionadores"],
-  ["tratamento-capilar", "Tratamento capilar e ampolas"],
-  ["hidratantes-e-shampoos", "Hidratantes corporais e cuidados com o cabelo"],
-  ["barba-e-masculino", "Produtos masculinos, tintura para barba e pomadas"],
-  ["acessorios-de-beleza", "Acessórios de beleza: esponjas, toucas e escovas"],
-  ["mascaras-capilares", "Máscaras capilares e cremes de tratamento"],
-  ["oleos-e-finalizadores", "Óleos, sprays e finalizadores para cabelo"],
-  ["tinturas-prateleira", "Tinturas das principais marcas"],
-  ["esponjas-e-escovas", "Esponjas, pentes e acessórios para cabelo"],
-];
+const loja = [];
 
 const lojaSchema = {
   "@context": "https://schema.org",
@@ -39,7 +26,7 @@ const lojaSchema = {
   name: "Kindo Cosméticos",
   alternateName: ["Kindo Perfumaria", "Kindo Lapa"],
   description: "Perfumaria e loja de cosméticos na Lapa, em São Paulo: perfumes, tintura e produtos para cabelo, depilação, skincare, óleos essenciais e acessórios de beleza.",
-  image: "/assets/loja/corredor-da-loja.webp",
+  image: "/assets/kindo-logo.png",
   logo: "/assets/kindo-logo.png",
   telephone: "+55 11 91372-3597",
   priceRange: "$",
@@ -74,7 +61,7 @@ function cabeca({ titulo, descricao, caminho, schemas }) {
   <meta property="og:site_name" content="Kindo Cosméticos">
   <meta property="og:title" content="${esc(titulo)}">
   <meta property="og:description" content="${esc(descricao)}">
-  <meta property="og:image" content="/assets/loja/corredor-da-loja.webp">
+  <meta property="og:image" content="/assets/kindo-logo.png">
   <meta name="twitter:card" content="summary_large_image">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -91,7 +78,6 @@ ${schemas.map((s) => `  <script type="application/ld+json">${JSON.stringify(s)}<
       </a>
       <nav class="topo__nav" aria-label="Principal">
         <a href="/#sobre">Sobre</a>
-        <a href="/#loja">A loja</a>
         <a href="/produtos/">Produtos</a>
         <a href="/#visite">Visite</a>
       </nav>
@@ -169,9 +155,6 @@ const home = cabeca({
             <a class="btn btn--ghost" href="/produtos/">Ver produtos</a>
           </div>
         </div>
-        <div class="hero__foto">
-          <img src="/assets/loja/corredor-da-loja.webp" alt="Interior da Kindo Cosméticos, perfumaria na Lapa" width="900" height="1200" fetchpriority="high">
-        </div>
       </div>
     </section>
 
@@ -191,22 +174,13 @@ const home = cabeca({
       </div>
     </section>
 
-    <section id="loja" class="secao secao--rosa">
-      <div class="wrap">
-        <h2>Conheça a loja</h2>
-        <p class="secao__lead">Prateleiras cheias, organizadas por tipo de cuidado. Dá uma olhada no que te espera.</p>
-        <div class="galeria">
-${loja.map(([f, alt]) => `          <figure><img src="/assets/loja/${f}.webp" alt="${esc(alt)}" width="900" height="1200" loading="lazy"><figcaption>${esc(alt)}</figcaption></figure>`).join("\n")}
-        </div>
-      </div>
-    </section>
 
     <section id="produtos" class="secao">
       <div class="wrap">
         <h2>O que você encontra na Kindo</h2>
         <div class="cats">
 ${categorias.map((c) => `          <a class="cat" href="/produtos/#${c.id}"><h3>${esc(c.nome)}</h3><p>${esc(c.descricao)}</p></a>`).join("\n")}
-          <a class="cat" href="/#loja"><h3>Acessórios de beleza</h3><p>Esponjas, escovas, pentes, toucas, lixas e tudo para a rotina de beleza.</p></a>
+          <a class="cat" href="/produtos/"><h3>Acessórios de beleza</h3><p>Esponjas, escovas, pentes, toucas, lixas e tudo para a rotina de beleza.</p></a>
         </div>
 
         <h2 class="mt">Alguns produtos da loja</h2>
