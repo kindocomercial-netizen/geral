@@ -1,0 +1,56 @@
+{
+  "categorias": [
+    {"id": "perfumes", "nome": "Perfumes", "descricao": "Perfumes femininos e masculinos para usar no dia a dia ou presentear."},
+    {"id": "cabelos", "nome": "Cabelos", "descricao": "Shampoo, condicionador, creme para pentear, máscaras, óleos, tintura e coloração."},
+    {"id": "depilacao", "nome": "Depilação", "descricao": "Cera depilatória quente e fria, folhas prontas, papel e loções pré e pós-depilação."},
+    {"id": "pele", "nome": "Pele e skincare", "descricao": "Sabonetes faciais, protetor solar, esfoliantes, tônicos e cremes para mãos e pés."},
+    {"id": "banho", "nome": "Corpo e banho", "descricao": "Sabonete líquido, body splash e cuidados diários para o corpo."},
+    {"id": "oleos", "nome": "Óleos essenciais e vegetais", "descricao": "Óleos essenciais puros e orgânicos para aromaterapia, óleos vegetais para pele e cabelo."},
+    {"id": "masculino", "nome": "Masculino e barba", "descricao": "Perfumes masculinos, pós-barba e cuidados para homens."}
+  ],
+  "produtos": [
+    {"ean": "3454090002975", "nome": "Perfume Vodka Brasil Paris Elysees masculino 100 ml", "marca": "Paris Elysees", "categoria": "perfumes"},
+    {"ean": "3454090003460", "nome": "Perfume Indala Paris Elysees feminino 100 ml", "marca": "Paris Elysees", "categoria": "perfumes"},
+    {"ean": "7891177022123", "nome": "Perfume Fiorucci Mr. Grey masculino 90 ml", "marca": "Fiorucci", "categoria": "masculino"},
+    {"ean": "8412300813006", "nome": "Bálsamo pós-barba Nivea Men Original Protect 100 ml", "marca": "Nivea Men", "categoria": "masculino"},
+
+    {"ean": "7908458329045", "nome": "Kit shampoo e condicionador Salon Line SOS Cachos Super Óleos", "marca": "Salon Line", "categoria": "cabelos"},
+    {"ean": "7908458329205", "nome": "Creme para pentear Salon Line Uva e Melancia 1 kg", "marca": "Salon Line", "categoria": "cabelos"},
+    {"ean": "7896214002717", "nome": "Loção Brilhante tintura progressiva para cabelos brancos", "marca": "Loção Brilhante", "categoria": "cabelos"},
+
+    {"ean": "7896433200307", "nome": "Cera depilatória quente Depilart 250 g", "marca": "Depilart", "categoria": "depilacao"},
+    {"ean": "7896433200871", "nome": "Cera depilatória quente Depilart Rosa 250 g", "marca": "Depilart", "categoria": "depilacao"},
+    {"ean": "7896433201250", "nome": "Cera depilatória quente Depilart Premium Negra 250 g", "marca": "Depilart", "categoria": "depilacao"},
+    {"ean": "7896433200888", "nome": "Cera depilatória fria Depilart Mel 200 g", "marca": "Depilart", "categoria": "depilacao"},
+    {"ean": "7896433200635", "nome": "Folhas prontas para depilação corporal Depilart", "marca": "Depilart", "categoria": "depilacao"},
+    {"ean": "7898212280517", "nome": "Cera depilatória quente Depil Bella Negra com cacau e amêndoas", "marca": "Depil Bella", "categoria": "depilacao"},
+    {"ean": "7898212280722", "nome": "Loção adstringente pré-depilação Depil Bella", "marca": "Depil Bella", "categoria": "depilacao"},
+    {"ean": "7898212280708", "nome": "Loção removedora pós-depilação Depil Bella", "marca": "Depil Bella", "categoria": "depilacao"},
+    {"ean": "7897169202894", "nome": "Papel para depilação Santa Clara", "marca": "Santa Clara", "categoria": "depilacao"},
+
+    {"ean": "7891010099725", "nome": "Sabonete facial Neutrogena Deep Clean limpeza profunda 80 g", "marca": "Neutrogena", "categoria": "pele"},
+    {"ean": "7899706183116", "nome": "Creme reparador para as mãos CeraVe", "marca": "CeraVe", "categoria": "pele"},
+    {"ean": "7897230305134", "nome": "Protetor solar Ricosol FPS 70", "marca": "Ricosol", "categoria": "pele"},
+    {"ean": "7897230305035", "nome": "Kit protetor solar Ricosol FPS 70 corporal e facial", "marca": "Ricosol", "categoria": "pele"},
+    {"ean": "7896858633834", "nome": "Esfoliante corpo e rosto Sugar Sugar Honey Yelsew 300 g", "marca": "Yelsew", "categoria": "pele"},
+    {"ean": "7896858633858", "nome": "Esfoliante corpo e rosto Sugar Sugar Summer Sunshine Yelsew 300 g", "marca": "Yelsew", "categoria": "pele"},
+    {"ean": "7898911309458", "nome": "Loção tônica facial Nupill Firmness Intensive", "marca": "Nupill", "categoria": "pele"},
+    {"ean": "7898924486047", "nome": "Creme esfoliante para os pés Nupill Firmness Intensive 120 g", "marca": "Nupill", "categoria": "pele"},
+    {"ean": "7896671601072", "nome": "Creme desodorante para os pés Foot", "marca": "Foot", "categoria": "pele"},
+
+    {"ean": "7891177603001", "nome": "Sabonete líquido Fiorucci Glicerinado Lavande de Provence 400 ml", "marca": "Fiorucci", "categoria": "banho"},
+    {"ean": "7891177605005", "nome": "Sabonete líquido Fiorucci Glicerinado Limone 400 ml", "marca": "Fiorucci", "categoria": "banho"},
+    {"ean": "7891350040791", "nome": "Sabonete líquido Bozzano Antibac Carvão Ativado", "marca": "Bozzano", "categoria": "banho"},
+    {"ean": "7898474841570", "nome": "Sabonete líquido Tok Bothânico 500 ml", "marca": "Tok Bothânico", "categoria": "banho"},
+    {"ean": "7897230306889", "nome": "Body splash Hidrabene Fine Bloom 200 ml", "marca": "Hidrabene", "categoria": "banho"},
+    {"ean": "7908458332458", "nome": "Body splash cabelo e corpo Salon Line", "marca": "Salon Line", "categoria": "banho"},
+
+    {"ean": "7895339017200", "nome": "Óleo essencial de Lavanda orgânico WNF 5 ml", "marca": "WNF", "categoria": "oleos"},
+    {"ean": "7895339021733", "nome": "Óleo essencial de Lavandin WNF 5 ml", "marca": "WNF", "categoria": "oleos"},
+    {"ean": "7895339017132", "nome": "Óleo essencial de Citronela orgânico WNF 5 ml", "marca": "WNF", "categoria": "oleos"},
+    {"ean": "7895339022297", "nome": "Óleo essencial de Copaíba WNF 5 ml", "marca": "WNF", "categoria": "oleos"},
+    {"ean": "7895339022501", "nome": "Óleo de Copaíba 100% natural WNF 30 ml", "marca": "WNF", "categoria": "oleos"},
+    {"ean": "7895339007553", "nome": "Óleo vegetal de Jojoba WNF face e cabelo", "marca": "WNF", "categoria": "oleos"},
+    {"ean": "7896679226055", "nome": "Óleo de Melaleuca Ideal", "marca": "Ideal", "categoria": "oleos"}
+  ]
+}

@@ -1,16 +1,42 @@
 # Site institucional · Kindo Cosméticos
 
-Site de uma página (HTML + CSS, sem build) hospedado na Cloudflare.
+Site estático (HTML + CSS) hospedado na Cloudflare, com página inicial e catálogo de produtos.
 
 ```
-public/          ← tudo que vai pro ar
-  index.html     página principal
-  styles.css     visual (cores rosa #E5007E / ameixa #9A3D80)
-  404.html       página de "não encontrada"
-  _headers       cabeçalhos de segurança e cache
-  assets/        logo e favicon
-wrangler.jsonc   configuração da Cloudflare
+catalogo/produtos.json   ← lista de produtos e categorias (edite aqui)
+scripts/gerar-site.mjs   gera as páginas a partir da lista
+public/                  ← tudo que vai pro ar
+  index.html             página inicial (gerada)
+  produtos/index.html    catálogo com busca (gerado)
+  styles.css             visual (cores rosa #E5007E / ameixa #9A3D80)
+  404.html               página de "não encontrada"
+  _headers               cabeçalhos de segurança e cache
+  assets/loja/           fotos da loja
+  assets/produtos/       fotos dos produtos, nomeadas pelo EAN (ex.: 7891010099725.webp)
+src/index.js             gera robots.txt e sitemap.xml com o domínio do site
+wrangler.jsonc           configuração da Cloudflare
 ```
+
+## Adicionar ou mudar produtos
+
+1. Coloque a foto em `public/assets/produtos/<EAN>.webp` (quadrada, fundo branco, ~480 px).
+2. Acrescente o item em `catalogo/produtos.json` (ean, nome, marca, categoria).
+3. Rode `node scripts/gerar-site.mjs` e faça o commit.
+
+Dica de SEO: escreva o nome do produto do jeito que as pessoas procuram no Google
+(tipo + marca + linha + tamanho), ex.: "Cera depilatória quente Depilart Rosa 250 g".
+
+## SEO já configurado
+
+- Título e descrição com "perfumaria", "cosméticos", "Lapa", "São Paulo".
+- Dados estruturados (schema.org): loja local (`HealthAndBeautyBusiness`), perguntas
+  frequentes (`FAQPage`) e catálogo (`ItemList` de `Product` com marca e EAN/GTIN).
+- Texto alternativo em todas as fotos, URL canônica, `robots.txt` e `sitemap.xml` automáticos.
+
+Depois de publicar, para aparecer no Google:
+1. Cadastre o site no **Google Search Console** e envie `https://<seu-dominio>/sitemap.xml`.
+2. No **Perfil da Empresa no Google** (Google Maps), coloque o link do site.
+3. Coloque o link do site na bio do Instagram.
 
 ## Ver no computador
 
