@@ -330,7 +330,9 @@
     alvo.focus({ preventScroll: true });
   });
 
+  let enviando = false;
   $('#btn-enviar').addEventListener('click', async () => {
+    if (enviando) return;
     validarEnvio();
     if ($('#btn-enviar').disabled) return;
     const data = dataSel();
@@ -350,11 +352,16 @@
     };
     if (totalContagem(c.contagem)) corpo.contagem = c.contagem;
     const botao = $('#btn-enviar');
+    enviando = true;
     botao.disabled = true;
     botao.textContent = 'Enviando…';
     try {
-      if (banco) await banco.salvar(id, corpo);
-      else {
+      if (banco) {
+        await banco.salvar(id, corpo);
+        // O banco pode demorar a devolver o envio; sem isto o formulário recarregava
+        // vazio e um segundo clique gravava um fechamento em branco por cima.
+        registros = [{ id, ...corpo }, ...registros.filter((x) => x.id !== id)].sort((a, b) => b.data.localeCompare(a.data));
+      } else {
         registros = [{ id, ...corpo }, ...registros.filter((x) => x.id !== id)].sort((a, b) => b.data.localeCompare(a.data));
         gravarLocal('registros', registros);
         render();
@@ -368,6 +375,7 @@
       if (err?.code === 'invalid_argument') { podeEscrever = false; avisar('Seu acesso não permite enviar. Peça acesso de Colaborador ao gerente.'); }
       else avisar('Não foi possível enviar. Confira a internet e tente de novo; os valores continuam aqui.');
     } finally {
+      enviando = false;
       botao.textContent = 'Enviar fechamento';
       validarEnvio();
     }
