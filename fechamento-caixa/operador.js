@@ -39,6 +39,15 @@
       registros = lerLocal('registros', []);
       $('#conexao').textContent = 'NÃO CONECTADO À LOJA: o que você enviar fica só neste computador. Entre na conta Claude da loja e recarregue a página.';
       $('#conexao').classList.add('offline');
+      if (registros.length) {
+        mostrarAcao(`Baixar ${registros.length} ${registros.length === 1 ? 'fechamento guardado' : 'fechamentos guardados'} neste computador`, () => {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(new Blob([JSON.stringify({ tipo: 'fechamentos-pendentes', registros }, null, 1)], { type: 'application/json' }));
+          a.download = `fechamentos-pendentes-${hoje()}.json`;
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        });
+      }
       render();
       return;
     }
@@ -51,6 +60,7 @@
       registros = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       render();
       if (!pendentesVerificados) { pendentesVerificados = true; enviarPendentes(); }
+      if (podeEscrever) mostrarAcao('Enviar arquivo de fechamentos guardados no caixa', importarArquivo);
     }, () => {
       $('#conexao').textContent = 'Sem conexão com os envios. Recarregue a página.';
       $('#conexao').classList.add('offline');
@@ -85,6 +95,30 @@
     }
     apagarLocal('registros');
     if (ok) avisar(`${ok} ${ok === 1 ? 'fechamento salvo' : 'fechamentos salvos'} só neste computador ${ok === 1 ? 'foi enviado' : 'foram enviados'} agora para a loja.`);
+  }
+
+  function mostrarAcao(texto, acao) {
+    const el = $('#conexao-acoes');
+    el.innerHTML = `<button type="button" class="link-acao">${esc(texto)}</button>`;
+    el.firstChild.onclick = acao;
+    el.hidden = false;
+  }
+
+  // Recebe o arquivo baixado num caixa que estava sem conexão e sobe o que falta.
+  function importarArquivo() {
+    const inp = document.createElement('input');
+    inp.type = 'file';
+    inp.accept = '.json,application/json';
+    inp.onchange = async () => {
+      try {
+        const dados = JSON.parse(await inp.files[0].text());
+        const lista = (dados.registros || []).filter((r) => r && /^\d{4}-\d{2}-\d{2}_cx\d+$/.test(r.id) && r.data && r.caixa);
+        const novos = lista.filter((l) => !registros.some((r) => r.id === l.id));
+        for (const { id, ...corpo } of novos) await banco.salvar(id, { ...corpo, enviadoOffline: true });
+        avisar(`${novos.length} de ${lista.length} ${lista.length === 1 ? 'fechamento enviado' : 'fechamentos enviados'}` + (lista.length > novos.length ? ' (os outros já estavam na loja).' : '.'));
+      } catch { avisar('Não consegui ler esse arquivo. Use o arquivo baixado pela própria página do caixa.'); }
+    };
+    inp.click();
   }
 
   // ---------- estado do formulário ----------

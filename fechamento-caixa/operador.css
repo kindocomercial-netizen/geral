@@ -92,3 +92,16 @@ button.cal-cx:hover { outline: 1px solid currentColor; }
   border-radius: 8px;
   font-weight: 600;
 }
+
+#conexao-acoes { margin-top: 6px; }
+.link-acao {
+  font: inherit;
+  font-size: 0.9em;
+  font-weight: 600;
+  color: inherit;
+  background: none;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
