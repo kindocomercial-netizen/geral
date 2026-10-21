@@ -14,8 +14,8 @@ public/                  ← tudo que vai pro ar
   assets/loja/           fotos da loja
   assets/produtos/       fotos dos produtos, nomeadas pelo EAN (ex.: 7891010099725.webp)
 src/seo.js               gera robots.txt e sitemap.xml com o domínio do site
-src/index.js             Worker (kindo-site.*.workers.dev)
-functions/_middleware.js Cloudflare Pages (kindocosmeticos.pages.dev)
+src/index.js             Worker antigo: redireciona kindo-site.*.workers.dev para o Pages
+functions/_middleware.js site oficial no Cloudflare Pages (kindocosmeticos.pages.dev)
 wrangler.jsonc           configuração da Cloudflare
 ```
 
@@ -73,7 +73,7 @@ npx wrangler login
 npx wrangler deploy
 ```
 
-O site fica em `https://kindo-site.<sua-conta>.workers.dev`.
+Site oficial: https://kindocosmeticos.pages.dev (Cloudflare Pages, pasta `public`, publica sozinho a cada push na branch de produção).
 
 ### Domínio próprio (ex.: kindo.com.br)
 Em **Workers & Pages → kindo-site → Settings → Domains & Routes → Add → Custom domain**.

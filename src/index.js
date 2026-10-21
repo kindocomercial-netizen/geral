@@ -1,9 +1,10 @@
-// Worker (kindo-site.*.workers.dev): robots.txt e sitemap.xml dinâmicos;
-// todo o resto é servido direto da pasta public/.
-import { respostaSeo } from "./seo.js";
+// Worker antigo (kindo-site.*.workers.dev): o site oficial agora é o Cloudflare Pages,
+// então todo acesso aqui é redirecionado (301) para o mesmo caminho no endereço novo.
+const SITE = "https://kindocosmeticos.pages.dev";
 
 export default {
-  async fetch(request, env) {
-    return respostaSeo(new URL(request.url)) ?? env.ASSETS.fetch(request);
+  async fetch(request) {
+    const url = new URL(request.url);
+    return Response.redirect(SITE + url.pathname + url.search, 301);
   },
 };
