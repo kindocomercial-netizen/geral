@@ -155,7 +155,7 @@ const rodape = `
       </div>
       <div>
         <h3>Horário</h3>
-        <p>Segunda a sexta: ${hora("08:30")} às ${hora("19:30")}<br>Sábado: ${hora("08:30")} às ${hora("19:00")}<br>Domingo: fechado</p>
+        <p>Segunda a sexta: ${hora("08:30")} às ${hora("19:30")}<br>Sábado: ${hora("08:30")} às ${hora("19:00")}<br>Domingo: fechado<br>Pacotes Shopee: 10h às 18h</p>
       </div>
       <div>
         <h3>Fale com a gente</h3>
@@ -217,7 +217,7 @@ const faq = [
   ["Qual o horário de funcionamento?", "De segunda a sexta, das 8h30 às 19h30, e aos sábados, das 8h30 às 19h. Domingo a loja fica fechada."],
   ["A Kindo faz entrega?", `Sim. Você pede pelo WhatsApp ${ZAP_TXT} e o motoboy entrega no mesmo dia.`],
   ["O preço no WhatsApp é o mesmo da loja?", "É igualzinho. Comprando no balcão ou pelo WhatsApp, você paga o mesmo valor."],
-  ["A Kindo é ponto de retirada da Shopee?", "Sim, a loja é ponto de coleta e retirada da Shopee. O horário de retirada de pacotes pode ser diferente do horário da loja, então confirme pelo WhatsApp antes de vir."],
+  ["A Kindo é ponto de retirada da Shopee?", "Sim, a loja é ponto de coleta e retirada da Shopee. A retirada e a entrega de pacotes Shopee funcionam das 10h às 18h, horário diferente do da loja."],
   ["Vocês vendem tintura para cabelo?", "Sim, temos tinturas e coloração de várias marcas, além de tonalizantes e tintura progressiva para cabelo e barba."],
   ["Como fico sabendo das promoções?", "Siga @kindoperfumaria no Instagram. Toda semana tem oferta, incluindo a Segunda do Preço de Custo."],
 ];
@@ -252,7 +252,7 @@ const home = cabeca({
           </a>
         </div>
         <figure class="hero__foto">
-          <img src="/assets/loja/fachada-kindo-lapa.webp" alt="Fachada da Kindo Cosméticos na Rua Doze de Outubro, 465, Lapa" width="1280" height="960" fetchpriority="high">
+          <img src="/assets/loja/fachada-kindo-lapa.webp" alt="Fachada da Kindo Cosméticos na Rua Doze de Outubro, 465, Lapa" width="1600" height="1200" fetchpriority="high">
           <figcaption>
             <strong>${ENDERECO}</strong>
             <span>${BAIRRO}</span>
@@ -383,7 +383,7 @@ ${avaliacoes.map((a) => `          <blockquote class="avaliacao">
             <dt>WhatsApp</dt>
             <dd><a href="https://wa.me/${ZAP}" target="_blank" rel="noopener">${ZAP_TXT}</a></dd>
             <dt>Shopee</dt>
-            <dd>Ponto de coleta e retirada. Confirme o horário de retirada pelo WhatsApp.</dd>
+            <dd>Ponto de coleta e retirada<br>Pacotes Shopee: <strong>das 10h às 18h</strong></dd>
           </dl>
           <div class="hero__cta">
             <a class="btn btn--zap" href="${zap()}" target="_blank" rel="noopener">${ZAP_SVG} Chamar no WhatsApp</a>
