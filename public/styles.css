@@ -193,7 +193,8 @@ dd .status--fechado { color: var(--rosa); }
   background: #fff; border-radius: 20px; overflow: hidden;
   border: 1px solid var(--linha); display: flex; flex-direction: column;
 }
-.prod[hidden], .secao[hidden] { display: none; }
+.prod[hidden], .secao[hidden], .prods[hidden] { display: none; }
+.nota-rodizio { margin: 18px 0 0; color: var(--suave); font-size: .92rem; }
 .prod img { width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; padding: 16px; background: #fff; }
 .prod__txt { padding: 4px 16px 18px; display: flex; flex-direction: column; flex: 1; }
 .prod__marca { margin: 0; font-size: .74rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ameixa); }

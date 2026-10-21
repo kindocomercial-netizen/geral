@@ -209,8 +209,21 @@ function cardProduto(p) {
 const comFoto = produtos.filter(temFoto);
 
 // ---------- Página inicial ----------
-const destaques = ["3454090003460", "7908458329205", "7896433201250", "7899706183116", "7897230305134", "7895339017200", "7891177022123", "7896858633834"]
-  .map((e) => comFoto.find((p) => p.ean === e)).filter(Boolean);
+// Destaques da página inicial: o catálogo é intercalado por categoria e dividido em grupos
+// de 8; o navegador mostra um grupo diferente a cada 10 dias (sem precisar publicar de novo).
+const POR_GRUPO = 8;
+const DIAS_POR_GRUPO = 10;
+const INICIO_RODIZIO = Math.floor(Date.UTC(2026, 9, 21) / 86400000); // 21/10/2026 = primeiro grupo
+const porCategoria = categorias.map((c) => comFoto.filter((p) => p.categoria === c.id));
+const intercalados = [];
+for (let i = 0; porCategoria.some((l) => l[i]); i++) porCategoria.forEach((l) => l[i] && intercalados.push(l[i]));
+const nGrupos = Math.ceil(intercalados.length / POR_GRUPO);
+const grupos = Array.from({ length: nGrupos }, (_, g) => {
+  const grupo = intercalados.slice(g * POR_GRUPO, (g + 1) * POR_GRUPO);
+  // completa o último grupo com produtos do começo para ter sempre 8
+  for (let i = 0; grupo.length < POR_GRUPO && i < intercalados.length; i++) if (!grupo.includes(intercalados[i])) grupo.push(intercalados[i]);
+  return grupo;
+});
 
 const faq = [
   ["Onde fica a Kindo Cosméticos?", `Na ${ENDERECO}, na Lapa, Zona Oeste de São Paulo (CEP ${CEP}).`],
@@ -328,11 +341,20 @@ ${necessidades.map(([t, d, msg]) => `          <a class="precisa__item" href="${
           </div>
           <a class="btn btn--ghost btn--sm" href="/produtos/">Ver catálogo</a>
         </div>
-        <div class="prods">
-          ${destaques.map(cardProduto).join("\n          ")}
-        </div>
+${grupos.map((g, i) => `        <div class="prods" data-grupo="${i}"${i ? " hidden" : ""}>
+          ${g.map(cardProduto).join("\n          ")}
+        </div>`).join("\n")}
+        <p class="nota-rodizio">Os destaques mudam a cada ${DIAS_POR_GRUPO} dias. Quer ver tudo? <a href="/produtos/">Abra o catálogo</a>.</p>
       </div>
     </section>
+    <script>
+      (function () {
+        var grupos = document.querySelectorAll('[data-grupo]');
+        var dia = Math.floor((Date.now() - 3 * 3600000) / 86400000);
+        var atual = ((Math.floor((dia - ${INICIO_RODIZIO}) / ${DIAS_POR_GRUPO}) % grupos.length) + grupos.length) % grupos.length;
+        grupos.forEach(function (g) { g.hidden = +g.dataset.grupo !== atual; });
+      })();
+    </script>
 
     <section id="historia" class="secao secao--suave">
       <div class="wrap historia">

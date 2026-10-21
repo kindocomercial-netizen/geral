@@ -32,6 +32,13 @@ Mudou algo? Edite lá e rode `node scripts/gerar-site.mjs`.
 Dica de SEO: escreva o nome do produto do jeito que as pessoas procuram no Google
 (tipo + marca + linha + tamanho), ex.: "Cera depilatória quente Depilart Rosa 250 g".
 
+## Rodízio de destaques
+
+A página inicial mostra 8 produtos e troca o grupo sozinha a cada 10 dias
+(constantes `POR_GRUPO`, `DIAS_POR_GRUPO` e `INICIO_RODIZIO` em `scripts/gerar-site.mjs`).
+Os grupos misturam categorias; produtos novos no `catalogo/produtos.json` entram no rodízio
+quando o site é gerado de novo.
+
 ## SEO já configurado
 
 - Título e descrição com "perfumaria", "cosméticos", "Lapa", "São Paulo".
