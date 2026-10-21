@@ -17,6 +17,12 @@ src/index.js             gera robots.txt e sitemap.xml com o domínio do site
 wrangler.jsonc           configuração da Cloudflare
 ```
 
+## Dados da loja
+
+Endereço, horário, nota do Google, ano de abertura etc. ficam no topo de
+`scripts/gerar-site.mjs` (conferidos no Perfil da Empresa no Google em out/2026).
+Mudou algo? Edite lá e rode `node scripts/gerar-site.mjs`.
+
 ## Adicionar ou mudar produtos
 
 1. Coloque a foto em `public/assets/produtos/<EAN>.webp` (quadrada, fundo branco, ~480 px).
@@ -65,5 +71,4 @@ Em **Workers & Pages → kindo-site → Settings → Domains & Routes → Add �
 O domínio precisa estar com o DNS na Cloudflare.
 
 ## Editar o conteúdo
-Textos, endereço, WhatsApp e Instagram ficam em `public/index.html`.
-O horário de funcionamento está como "Consulte pelo WhatsApp". Troque pelo horário real.
+Os textos ficam em `scripts/gerar-site.mjs`; não edite `public/index.html` direto, ele é gerado.
