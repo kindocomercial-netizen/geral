@@ -13,7 +13,9 @@ public/                  ← tudo que vai pro ar
   _headers               cabeçalhos de segurança e cache
   assets/loja/           fotos da loja
   assets/produtos/       fotos dos produtos, nomeadas pelo EAN (ex.: 7891010099725.webp)
-src/index.js             gera robots.txt e sitemap.xml com o domínio do site
+src/seo.js               gera robots.txt e sitemap.xml com o domínio do site
+src/index.js             Worker (kindo-site.*.workers.dev)
+functions/_middleware.js Cloudflare Pages (kindocosmeticos.pages.dev)
 wrangler.jsonc           configuração da Cloudflare
 ```
 
