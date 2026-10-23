@@ -1,7 +1,7 @@
 (function () {
   const { DENOMINACOES, paraCentavos, formatar, totalContagem, calcularCaixa, diagnosticar } = window.Calc;
   const DIAS = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
-  const CAMPOS = ['sistema', 'trocoInicial', 'suprimento', 'credito', 'creditoParcelado', 'debito', 'pix', 'trocoFinal', 'despesas', 'valeTransporte'];
+  const CAMPOS = ['sistema', 'trocoInicial', 'suprimento', 'credito', 'creditoParcelado', 'debito', 'pix', 'trocoFinal', 'despesas', 'valeTransporte', 'vendasDinheiro'];
   const CONF = { alta: 'provável', media: 'possível', baixa: 'verifique' };
   const LOCAL = 'fechamento-operador:';
 
@@ -128,7 +128,7 @@
 
   function vazio() {
     return { sistema: 0, trocoInicial: 0, suprimento: 0, credito: 0, creditoParcelado: 0, debito: 0, pix: 0,
-      trocoFinal: 0, despesas: 0, valeTransporte: 0, sangrias: [], outros: [], contagem: {} };
+      trocoFinal: 0, despesas: 0, valeTransporte: 0, vendasDinheiro: 0, despesasDesc: '', sangrias: [], outros: [], contagem: {} };
   }
   const idDoc = (data, n) => `${data}_cx${n}`;
   const dataSel = () => $('#f-data').value;
@@ -172,6 +172,7 @@
     }
     CAMPOS.forEach((k) => ($(`#f-${k}`).value = paraCampo(c[k])));
     $('#f-just').value = c.justificativa || '';
+    $('#f-despesasDesc').value = c.despesasDesc || '';
     $('#f-recontado').checked = !!c.recontado;
     renderSublistas();
     $('#contagem').hidden = true;
@@ -221,6 +222,11 @@
     ultimoDiag = dg;
     $('#res-sis').textContent = formatar(r.totalSistema);
     $('#res-gav').textContent = formatar(r.totalGaveta);
+    // Vendas em dinheiro do sistema x dinheiro que de fato passou pela gaveta.
+    $$('.res-din').forEach((el) => (el.hidden = !c.vendasDinheiro));
+    $('#res-din-sis').textContent = formatar(c.vendasDinheiro || 0);
+    $('#res-din-gav').textContent = formatar(r.dinheiro);
+    $('#linha-despesasDesc').hidden = !c.despesas && !c.despesasDesc;
     const card = $('#res-card');
     const rotulo = {
       ok: 'Caixa confere', atencao: r.diferenca < 0 ? 'Falta' : 'Sobra',
@@ -261,7 +267,8 @@
     $('#btn-enviar').disabled = faltas.length > 0;
     const semMotivo = ultimoDiag?.nivel === 'grave' && !$('#f-just').value.trim();
     $('#enviar-nota').textContent = faltas.length ? 'Falta: ' + faltas.join(', ') + '.'
-      : [semMotivo ? 'Diferença alta sem explicação: dá para enviar, mas o gerente vai ver.' : '', existente ? 'Vai substituir o envio anterior deste caixa.' : ''].filter(Boolean).join(' ');
+      : [semMotivo ? 'Diferença alta sem explicação: dá para enviar, mas o gerente vai ver.' : '',
+        c.despesas && !(c.despesasDesc || '').trim() ? 'Descreva a despesa antes de enviar.' : '', existente ? 'Vai substituir o envio anterior deste caixa.' : ''].filter(Boolean).join(' ');
   }
 
   function guardarRascunho() {
@@ -277,6 +284,7 @@
     const t = e.target;
     if (t.id === 'f-operador') { gravarLocal('operador', t.value); validarEnvio(); return; }
     if (t.id === 'f-data') return;
+    if (t.id === 'f-despesasDesc') { c.despesasDesc = t.value; guardarRascunho(); validarEnvio(); return; }
     if (t.dataset.den) {
       c.contagem[t.dataset.den] = Math.max(0, parseInt(t.value, 10) || 0);
       $(`#f-sub${t.dataset.den}`).textContent = formatar(+t.dataset.den * c.contagem[t.dataset.den], false);
@@ -347,6 +355,7 @@
       diferenca: r.diferenca, status: r.status, nivel: ultimoDiag.nivel,
       dicas: ultimoDiag.dicas.filter((d) => d.confianca !== 'baixa').map((d) => ({ confianca: d.confianca, titulo: d.titulo })),
       justificativa: $('#f-just').value.trim(), recontado: $('#f-recontado').checked,
+      despesasDesc: c.despesas ? (c.despesasDesc || '').trim() : '',
       enviadoEm: new Date().toISOString(),
       reenvios: anterior ? [...(anterior.reenvios || []), { enviadoEm: anterior.enviadoEm, operador: anterior.operador, diferenca: anterior.diferenca }].slice(-10) : [],
     };

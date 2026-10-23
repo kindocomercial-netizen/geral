@@ -48,6 +48,7 @@
             <div class="linha"><span>Rel. caixa sistema<small>total de vendas do relatório</small></span><input class="moeda" id="f-sistema" data-k="sistema" inputmode="decimal" placeholder="0,00"></div>
             <div class="linha"><span>Troco inicial<small id="dica-troco">o que havia na gaveta ao abrir</small></span><input class="moeda" id="f-trocoInicial" data-k="trocoInicial" inputmode="decimal" placeholder="0,00"></div>
             <div class="linha"><span>Suprimento<small>reforço de troco durante o dia</small></span><input class="moeda" id="f-suprimento" data-k="suprimento" inputmode="decimal" placeholder="0,00"></div>
+            <div class="linha"><span>Vendas em dinheiro<small>total em dinheiro no relatório do sistema</small></span><input class="moeda" id="f-vendasDinheiro" data-k="vendasDinheiro" inputmode="decimal" placeholder="0,00"></div>
           </fieldset>
 
           <fieldset class="bloco">
@@ -61,6 +62,7 @@
             <div class="contagem" id="contagem" hidden></div>
             <div class="sublista" id="lista-sangrias"></div>
             <div class="linha"><span>Despesas<small>pagas com dinheiro do caixa</small></span><input class="moeda" id="f-despesas" data-k="despesas" inputmode="decimal" placeholder="0,00"></div>
+            <div class="linha linha-texto" id="linha-despesasDesc" hidden><span>Descrição da despesa<small>o que foi pago e para quem</small></span><input id="f-despesasDesc" placeholder="Ex.: água R$ 20 + correio R$ 50,25"></div>
             <div class="linha"><span>Vale transporte</span><input class="moeda" id="f-valeTransporte" data-k="valeTransporte" inputmode="decimal" placeholder="0,00"></div>
             <div class="sublista" id="lista-outros"></div>
             <div class="linha-botoes">
@@ -77,6 +79,8 @@
             <dl class="res-contas">
               <dt>Total sistema</dt><dd id="res-sis">R$ 0,00</dd>
               <dt>Total gaveta</dt><dd id="res-gav">R$ 0,00</dd>
+              <dt class="res-din" hidden>Dinheiro no sistema</dt><dd class="res-din" id="res-din-sis" hidden>R$ 0,00</dd>
+              <dt class="res-din" hidden>Dinheiro na gaveta</dt><dd class="res-din" id="res-din-gav" hidden>R$ 0,00</dd>
             </dl>
           </div>
 
