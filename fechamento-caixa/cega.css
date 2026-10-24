@@ -13,7 +13,8 @@
 .g-tab tfoot td { border-bottom: 0; padding-top: 8px; font-weight: 600; }
 .g-tab .num, .g-hist .num { font-family: var(--numeros); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
 .g-tab th:nth-child(n+2) { text-align: right; }
-.g-tab input.moeda { width: 100%; min-width: 84px; padding: 6px 8px; font-size: 14px; }
+.g-tab input.moeda { width: 100%; min-width: 0; max-width: 110px; padding: 6px 6px; font-size: 14px; }
+.g-tab th:first-child, .g-tab td:first-child { width: 30%; }
 .g-salvar { justify-self: start; }
 
 .g-titulo { font-size: 15px; margin: 8px 0 8px; }
@@ -26,3 +27,6 @@
 .g-trava .nota { margin: 0; }
 .g-trava input { letter-spacing: 0.3em; font-family: var(--numeros); }
 #g-trava-erro { color: var(--falta); min-height: 1.2em; }
+.g-alerta { margin: 0; font-size: 13.5px; padding: 8px 10px; border-radius: 8px; background: var(--ok-fundo); color: var(--tinta); }
+.g-alerta.g-ruim { background: var(--falta-fundo); }
+.g-alerta b { font-family: var(--numeros); font-weight: 600; }
