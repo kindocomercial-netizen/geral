@@ -18,6 +18,14 @@
     { id: 'pix', nome: 'PIX' },
   ];
 
+  // No Anglo o cartão (crédito, débito e parcelado) vem em "Outros". Lançamentos antigos
+  // não têm o campo cartao: soma os campos de antes para não mostrar 0,00.
+  const sis = (a, id) => {
+    if (!a) return 0;
+    if (id === 'cartao' && a.cartao == null) return (a.outros || 0) + (a.credito || 0) + (a.creditoParcelado || 0) + (a.debito || 0);
+    return a[id] || 0;
+  };
+
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
@@ -51,7 +59,7 @@
   }
   function comparar(r, a) {
     const ct = contado(r);
-    const linhas = FORMAS.map((f) => ({ ...f, contado: ct[f.id], sistema: a?.[f.id] || 0, dif: ct[f.id] - (a?.[f.id] || 0) }));
+    const linhas = FORMAS.map((f) => ({ ...f, contado: ct[f.id], sistema: sis(a, f.id), dif: ct[f.id] - sis(a, f.id) }));
     const dif = linhas.reduce((t, l) => t + l.dif, 0);
     const status = Math.abs(dif) <= TOL ? 'ok' : dif < 0 ? 'falta' : 'sobra';
     return { linhas, dif, status };
@@ -394,7 +402,7 @@
     $('#g-caixas').innerHTML = Array.from({ length: QTD_CAIXAS }, (_, i) => i + 1).map((n) => {
       const s = situacao(data, n);
       const a = anglo[idDoc(data, n)] || {};
-      const linhas = s.r ? comparar(s.r, a).linhas : FORMAS.map((f) => ({ ...f, contado: 0, sistema: a[f.id] || 0, dif: 0 }));
+      const linhas = s.r ? comparar(s.r, a).linhas : FORMAS.map((f) => ({ ...f, contado: 0, sistema: sis(a, f.id), dif: 0 }));
       if (s.dif != null) { n0++; dTot += s.dif; }
       const cab = s.r ? `${esc(s.r.operador || '—')} · enviado ${hora(s.r.enviadoEm)}` : 'O caixa ainda não enviou';
       const extras = s.r ? [
@@ -409,10 +417,10 @@
           <tbody>${linhas.map((l) => `<tr>
             <td>${l.nome}</td>
             <td class="num">${s.r ? formatar(l.contado, false) : '—'}</td>
-            <td><input class="moeda" id="g-${n}-${l.id}" data-g="${l.id}" inputmode="decimal" placeholder="0,00" value="${paraCampo(a[l.id] || 0)}" aria-label="${l.nome} no sistema, caixa ${n}"></td>
+            <td><input class="moeda" id="g-${n}-${l.id}" data-g="${l.id}" inputmode="decimal" placeholder="0,00" value="${paraCampo(sis(a, l.id))}" aria-label="${l.nome} no sistema, caixa ${n}"></td>
             <td class="num ${s.dif != null && Math.abs(l.dif) > TOL ? (l.dif < 0 ? 'neg' : 'pos') : ''}">${s.dif != null ? sinal(l.dif) : '—'}</td></tr>`).join('')}</tbody>
           <tfoot><tr><td>Total</td><td class="num">${s.r ? formatar(linhas.reduce((t, l) => t + l.contado, 0), false) : '—'}</td>
-            <td class="num">${formatar(FORMAS.reduce((t, f) => t + (a[f.id] || 0), 0), false)}</td>
+            <td class="num">${formatar(FORMAS.reduce((t, f) => t + sis(a, f.id), 0), false)}</td>
             <td class="num ${s.dif != null && Math.abs(s.dif) > TOL ? (s.dif < 0 ? 'neg' : 'pos') : ''}"><b>${s.dif != null ? sinal(s.dif) : '—'}</b></td></tr></tfoot>
         </table>
         ${extras}
@@ -443,7 +451,7 @@
     if (!b || b.disabled) return;
     const n = +b.dataset.salvar;
     const data = gData();
-    const corpo = { data, caixa: n, lancadoEm: new Date().toISOString() };
+    const corpo = { ...(anglo[idDoc(data, n)] || {}), data, caixa: n, lancadoEm: new Date().toISOString() };
     FORMAS.forEach((f) => (corpo[f.id] = paraCentavos($(`#g-${n}-${f.id}`).value)));
     b.disabled = true;
     try {
