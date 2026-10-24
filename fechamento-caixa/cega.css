@@ -30,3 +30,8 @@
 .g-alerta { margin: 0; font-size: 13.5px; padding: 8px 10px; border-radius: 8px; background: var(--ok-fundo); color: var(--tinta); }
 .g-alerta.g-ruim { background: var(--falta-fundo); }
 .g-alerta b { font-family: var(--numeros); font-weight: 600; }
+.g-real { border-top: 1px solid var(--linha); padding-top: 8px; display: grid; gap: 8px; }
+.g-real summary { cursor: pointer; font-weight: 600; font-size: 14.5px; }
+.g-real summary .nota { font-weight: 400; }
+.g-real[open] summary { margin-bottom: 6px; }
+.g-real .g-real-res { margin-top: 4px; }

@@ -59,6 +59,31 @@
     return { linhas, dif, status: Math.abs(dif) <= TOL ? 'ok' : dif < 0 ? 'falta' : 'sobra' };
   }
 
+  // Fechamento real: a contagem do funcionário com as movimentações do relatório do Anglo
+  // (troco inicial, vendas em dinheiro, sangria e despesa registradas no sistema).
+  const REAL = [
+    { id: 'trocoInicial', nome: 'Troco inicial', func: (r) => r.trocoInicial || 0 },
+    { id: 'dinheiro', nome: 'Vendas em dinheiro', func: (r) => r.vendasDinheiro || 0 },
+    { id: 'sangria', nome: 'Sangrias', func: (r) => somar(r.sangrias) },
+    { id: 'despesa', nome: 'Despesas', func: (r) => (r.despesas || 0) + (r.valeTransporte || 0) },
+    { id: 'trocoFinal', nome: 'Troco final', func: (r) => r.trocoFinal || 0 },
+  ];
+  const temReal = (a) => a && ['trocoInicial', 'sangria', 'despesa'].every((k) => a[k] != null);
+  function fechamentoReal(r, a) {
+    const sup = r?.suprimento || 0, vale = r?.valeTransporte || 0;
+    // Se o vale-transporte não está na despesa do Anglo, ele sai da gaveta do mesmo jeito.
+    const esperado = (a.trocoInicial || 0) + sup + (a.dinheiro || 0) - (a.sangria || 0) - (a.despesa || 0) - vale;
+    const gaveta = r ? r.trocoFinal || 0 : 0;
+    const ct = r ? contado(r) : { cartao: 0, pix: 0 };
+    const formas = [
+      { nome: 'Dinheiro na gaveta', func: gaveta, sis: esperado },
+      { nome: 'Cartão', func: ct.cartao, sis: sis(a, 'cartao') },
+      { nome: 'PIX', func: ct.pix, sis: sis(a, 'pix') },
+    ].map((l) => ({ ...l, dif: l.func - l.sis }));
+    return { esperado, sup, vale, formas, dif: formas.reduce((t, l) => t + l.dif, 0) };
+  }
+  const abertos = new Set();
+
   let banco = null;
   let registros = [];
   let anglo = {};
@@ -232,11 +257,42 @@
             <td class="num ${s.dif != null ? cls(s.dif) : ''}"><b>${s.dif != null ? sinal(s.dif) : '—'}</b></td></tr></tfoot>
         </table></div>
         ${extras.join('')}
+        ${blocoReal(n, s.r, a)}
         <button type="button" class="primario g-salvar" data-salvar="${n}">Salvar números do sistema</button>
       </article>`;
     }).join('');
     $('#g-resumo').textContent = n0 ? `${n0} ${n0 === 1 ? 'caixa conferido' : 'caixas conferidos'} · diferença real do dia ${sinal(dTot)}` : 'Nenhum caixa conferido neste dia.';
     renderHistorico();
+  }
+
+  function blocoReal(n, r, a) {
+    const cls = (v) => (Math.abs(v) > TOL ? (v < 0 ? 'neg' : 'pos') : '');
+    const ok = temReal(a) && (a.dinheiro != null || sis(a, 'cartao') || sis(a, 'pix'));
+    const fr = ok ? fechamentoReal(r, a) : null;
+    const resumo = !ok ? 'faltam números do relatório' : r ? `diferença ${sinal(fr.dif)}` : 'o caixa não enviou';
+    const mov = REAL.map((l) => {
+      const f = r ? l.func(r) : null;
+      const v = a[l.id];
+      const d = f != null && v != null ? f - v : null;
+      return `<tr><td>${l.nome}</td><td class="num">${f != null ? formatar(f, false) : '—'}</td>
+        <td>${l.id === 'dinheiro' ? `<span class="num">${formatar(v || 0, false)}</span>` : `<input class="moeda" id="g-${n}-${l.id}" inputmode="decimal" placeholder="0,00" value="${paraCampo(v || 0)}" aria-label="${l.nome} no sistema, caixa ${n}">`}</td>
+        <td class="num ${d != null ? cls(d) : ''}">${d != null ? sinal(d) : '—'}</td></tr>`;
+    }).join('');
+    const resultado = fr ? `<div class="rolagem"><table class="g-tab g-real-res">
+        <thead><tr><th>Fechamento real</th><th>Funcionário</th><th>Sistema</th><th>Diferença</th></tr></thead>
+        <tbody>${fr.formas.map((l) => `<tr><td>${l.nome}</td><td class="num">${r ? formatar(l.func, false) : '—'}</td><td class="num">${formatar(l.sis, false)}</td><td class="num ${r ? cls(l.dif) : ''}">${r ? sinal(l.dif) : '—'}</td></tr>`).join('')}</tbody>
+        <tfoot><tr><td>Diferença real</td><td></td><td></td><td class="num ${r ? cls(fr.dif) : ''}"><b>${r ? sinal(fr.dif) : '—'}</b></td></tr></tfoot>
+      </table></div>
+      <p class="nota">Dinheiro esperado na gaveta = troco inicial ${formatar(a.trocoInicial || 0)}${fr.sup ? ` + suprimento ${formatar(fr.sup)}` : ''} + vendas em dinheiro ${formatar(a.dinheiro || 0)} − sangrias ${formatar(a.sangria || 0)} − despesas ${formatar(a.despesa || 0)}${fr.vale ? ` − vale-transporte ${formatar(fr.vale)}` : ''} = <b>${formatar(fr.esperado)}</b>. Os números do sistema vêm do relatório do Anglo; a gaveta, o cartão e o PIX vêm da contagem do funcionário.</p>`
+      : '<p class="nota">Lance troco inicial, sangrias e despesas do relatório do Anglo e clique em "Salvar números do sistema".</p>';
+    return `<details class="g-real" data-real="${n}" ${abertos.has(n) ? 'open' : ''}>
+      <summary>Fechamento real <span class="nota">· ${resumo}</span></summary>
+      <div class="rolagem"><table class="g-tab">
+        <thead><tr><th>Movimento</th><th>Funcionário</th><th>Sistema (Anglo)</th><th>Diferença</th></tr></thead>
+        <tbody>${mov}</tbody>
+      </table></div>
+      ${resultado}
+    </details>`;
   }
 
   function renderHistorico() {
@@ -260,6 +316,7 @@
     const data = gData();
     const corpo = { ...(anglo[idDoc(data, n)] || {}), data, caixa: n, lancadoEm: new Date().toISOString() };
     FORMAS.forEach((f) => (corpo[f.id] = paraCentavos($(`#g-${n}-${f.id}`).value)));
+    REAL.forEach((l) => { const el = $(`#g-${n}-${l.id}`); if (el && l.id !== 'dinheiro') corpo[l.id] = paraCentavos(el.value); });
     b.disabled = true;
     try {
       await banco.collection('anglo').doc(idDoc(data, n)).set(corpo);
@@ -271,6 +328,10 @@
       b.disabled = false;
     }
   });
+  $('#g-caixas').addEventListener('toggle', (e) => {
+    const d = e.target.closest?.('[data-real]');
+    if (d) d.open ? abertos.add(+d.dataset.real) : abertos.delete(+d.dataset.real);
+  }, true);
   $('#g-hist').addEventListener('click', (e) => {
     const b = e.target.closest('[data-dia]');
     if (b) { $('#g-data').value = b.dataset.dia; render(); }
