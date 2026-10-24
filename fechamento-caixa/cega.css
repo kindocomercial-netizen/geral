@@ -35,3 +35,6 @@
 .g-real summary .nota { font-weight: 400; }
 .g-real[open] summary { margin-bottom: 6px; }
 .g-real .g-real-res { margin-top: 4px; }
+.st-naoEnviou { background: var(--falta-fundo); color: var(--falta); outline: 1px dashed currentColor; outline-offset: -1px; }
+.cal-dia.g-cal-sel { border-color: var(--acento); box-shadow: inset 0 0 0 1px var(--acento); }
+#g-cal-kpis { margin-top: 4px; }

@@ -166,7 +166,8 @@
     pararAnglo = null;
     anglo = {};
     $('#g-caixas').innerHTML = '';
-    $('#g-hist').innerHTML = '';
+    $('#g-cal').innerHTML = '';
+    $('#g-cal-kpis').innerHTML = '';
     mostrarTrava();
   }
 
@@ -213,9 +214,17 @@
   function situacao(data, n) {
     const r = registros.find((x) => x.id === idDoc(data, n));
     const a = anglo[idDoc(data, n)];
-    if (!r) return { status: 'nenhum' };
+    if (!r) return { status: 'nenhum', a };
     if (!a) return { status: 'aguarda', r };
     return { ...comparar(r, a), r, a };
+  }
+  // Envio sem nenhuma contagem (ex.: o envio em branco do clique duplo) num dia que teve venda.
+  const vendeu = (a) => !!(a && (a.vendaDia || sis(a, 'dinheiro') + sis(a, 'cartao') + sis(a, 'pix')));
+  const emBranco = (r, a) => vendeu(a) && !r.trocoFinal && !r.pix && !contado(r).cartao && !somar(r.sangrias);
+  // Diferença do fechamento real (movimentos do Anglo); sem eles, a conferência forma a forma.
+  function difReal(r, a) {
+    const dif = temReal(a) ? fechamentoReal(r, a).dif : comparar(r, a).dif;
+    return { dif, status: Math.abs(dif) <= TOL ? 'ok' : dif < 0 ? 'falta' : 'sobra' };
   }
 
   function render() {
@@ -226,10 +235,13 @@
       const s = situacao(data, n);
       const a = anglo[idDoc(data, n)] || {};
       const linhas = s.r ? comparar(s.r, a).linhas : FORMAS.map((f) => ({ ...f, contado: 0, sistema: sis(a, f.id), dif: 0 }));
-      if (s.dif != null) { n0++; dTot += s.dif; }
+      if (s.dif != null && !emBranco(s.r, s.a)) { n0++; dTot += difReal(s.r, s.a).dif; }
       const totalAnglo = FORMAS.reduce((t, f) => t + sis(a, f.id), 0);
       const cls = (v) => (Math.abs(v) > TOL ? (v < 0 ? 'neg' : 'pos') : '');
       const extras = [];
+      if (s.r && s.a && emBranco(s.r, s.a)) {
+        extras.push('<p class="g-alerta g-ruim">Este envio está em branco (sem troco final, cartão nem PIX), mas o Anglo tem venda neste dia. Não é falta de dinheiro: o fechamento do caixa não foi lançado. Peça ao operador para reenviar.</p>');
+      }
       if (s.r) {
         // O que o próprio operador digitou como sistema, contra o Anglo.
         if (s.a) {
@@ -262,7 +274,7 @@
       </article>`;
     }).join('');
     $('#g-resumo').textContent = n0 ? `${n0} ${n0 === 1 ? 'caixa conferido' : 'caixas conferidos'} · diferença real do dia ${sinal(dTot)}` : 'Nenhum caixa conferido neste dia.';
-    renderHistorico();
+    renderCalendario();
   }
 
   function blocoReal(n, r, a) {
@@ -295,14 +307,76 @@
     </details>`;
   }
 
-  function renderHistorico() {
-    const dias = Array.from({ length: 14 }, (_, i) => somaDias(hoje(), -i));
-    $('#g-hist').innerHTML = `<thead><tr><th>Dia</th>${Array.from({ length: QTD_CAIXAS }, (_, i) => `<th>Caixa ${i + 1}</th>`).join('')}</tr></thead>
-      <tbody>${dias.map((d) => `<tr><td><button type="button" class="link-dia" data-dia="${d}">${dataBR(d).slice(0, 5)}</button></td>${
-        Array.from({ length: QTD_CAIXAS }, (_, i) => {
-          const s = situacao(d, i + 1);
-          return `<td>${chip(s.status)}${s.dif != null ? ` <span class="num">${sinal(s.dif)}</span>` : ''}</td>`;
-        }).join('')}</tr>`).join('')}</tbody>`;
+  // ---------- calendário da gerente ----------
+  const DIAS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+  const diaSemana = (iso) => new Date(iso + 'T12:00:00').getDay();
+  const gMes = () => $('#g-cal-mes').value || gData().slice(0, 7);
+  function renderCalendario() {
+    const mes = gMes();
+    const [ano, m] = mes.split('-').map(Number);
+    const hj = hoje();
+    const ultimo = new Date(ano, m, 0).getDate();
+    const caixas = Array.from({ length: QTD_CAIXAS }, (_, i) => i + 1);
+    const conferidos = [];
+    let semAnglo = 0, naoEnviou = 0;
+    const celulas = {};
+    for (let d = 1; d <= ultimo; d++) {
+      const iso = `${mes}-${String(d).padStart(2, '0')}`;
+      if (iso > hj) continue;
+      celulas[iso] = caixas.map((n) => {
+        const s = situacao(iso, n);
+        if (!s.r) {
+          if (!s.a) return null;
+          if (!vendeu(s.a)) return { n, st: 'semVenda', txt: 'sem venda' };
+          naoEnviou++;
+          return { n, st: 'naoEnviou', txt: 'não enviou' };
+        }
+        if (!s.a) {
+          if (s.r.status === 'semVenda') return { n, st: 'semVenda', txt: 'sem venda' };
+          semAnglo++;
+          return { n, st: 'pendente', txt: 'falta Anglo', op: s.r.operador };
+        }
+        if (emBranco(s.r, s.a)) { naoEnviou++; return { n, st: 'naoEnviou', txt: 'em branco', op: s.r.operador }; }
+        const real = difReal(s.r, s.a);
+        conferidos.push({ n, ...real });
+        return { n, st: real.status, txt: sinal(real.dif), dif: real.dif, op: s.r.operador };
+      });
+    }
+    const fora = conferidos.filter((c) => c.status !== 'ok');
+    const faltas = fora.filter((c) => c.dif < 0), sobras = fora.filter((c) => c.dif > 0);
+    const soma = (l) => l.reduce((t, c) => t + c.dif, 0);
+    const saldo = soma(conferidos);
+    const cor = (v) => (v < -TOL ? 'neg' : v > TOL ? 'pos' : '');
+    const plural = (k, um, varios) => `${k} ${k === 1 ? um : varios}`;
+    $('#g-cal-kpis').innerHTML = `
+      <div class="kpi"><span>Faltas reais</span><strong class="neg">${formatar(soma(faltas))}</strong><small>${plural(faltas.length, 'fechamento', 'fechamentos')} acima de ${formatar(TOL)}</small></div>
+      <div class="kpi"><span>Sobras reais</span><strong class="pos">${formatar(soma(sobras))}</strong><small>${plural(sobras.length, 'fechamento', 'fechamentos')}</small></div>
+      <div class="kpi"><span>Saldo real do mês</span><strong class="${cor(saldo)}">${sinal(saldo)}</strong><small>${plural(conferidos.length, 'caixa conferido', 'caixas conferidos')}</small></div>
+      <div class="kpi"><span>Por caixa</span><small>${caixas.map((n) => { const l = conferidos.filter((c) => c.n === n); const t = soma(l); return `Caixa ${n}: <b class="${cor(t)}">${sinal(t)}</b> (${l.length})`; }).join('<br>')}</small></div>
+      <div class="kpi"><span>Pendências</span><small>${plural(semAnglo, 'envio', 'envios')} sem número do Anglo<br>${plural(naoEnviou, 'caixa', 'caixas')} com venda e sem envio (ou envio em branco)</small></div>`;
+
+    const temDomingo = Object.keys(celulas).some((iso) => diaSemana(iso) === 0 && celulas[iso].some(Boolean));
+    const cols = temDomingo ? [0, 1, 2, 3, 4, 5, 6] : [1, 2, 3, 4, 5, 6];
+    const el = $('#g-cal');
+    el.style.setProperty('--cols', cols.length);
+    let html = cols.map((c) => `<div class="cal-cab">${DIAS[c]}</div>`).join('');
+    let primeiro = true;
+    for (let d = 1; d <= ultimo; d++) {
+      const iso = `${mes}-${String(d).padStart(2, '0')}`;
+      const pos = cols.indexOf(diaSemana(iso));
+      if (pos < 0) continue;
+      if (primeiro) { html += '<div class="cal-dia fora"></div>'.repeat(pos); primeiro = false; }
+      const cel = celulas[iso];
+      const sel = iso === gData() ? ' g-cal-sel' : '';
+      if (!cel || !cel.some(Boolean)) { html += `<div class="cal-dia vazio${sel}"><span class="cal-num">${d}</span></div>`; continue; }
+      const linhas = cel.map((c, i) => c
+        ? `<button type="button" class="cal-cx st-${c.st}" data-g-dia="${iso}" title="${esc(c.op || '')}"><span>cx${c.n}</span><span>${c.txt}</span></button>`
+        : `<span class="cal-cx"><span>cx${i + 1}</span><span>—</span></span>`).join('');
+      const total = cel.reduce((t, c) => t + (c?.dif || 0), 0);
+      const temDif = cel.some((c) => c?.dif != null);
+      html += `<div class="cal-dia${sel}"><span class="cal-num">${d}${temDif ? `<small class="${cor(total)}">${sinal(total)}</small>` : ''}</span>${linhas}</div>`;
+    }
+    el.innerHTML = html;
   }
 
   $('#g-caixas').addEventListener('focusout', (e) => {
@@ -332,14 +406,27 @@
     const d = e.target.closest?.('[data-real]');
     if (d) d.open ? fechados.delete(+d.dataset.real) : fechados.add(+d.dataset.real);
   }, true);
-  $('#g-hist').addEventListener('click', (e) => {
-    const b = e.target.closest('[data-dia]');
-    if (b) { $('#g-data').value = b.dataset.dia; render(); }
+  $('#g-cal').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-g-dia]');
+    if (!b) return;
+    $('#g-data').value = b.dataset.gDia;
+    render();
+    $('#g-caixas').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
+  const moverMes = (k) => {
+    const [a, m] = gMes().split('-').map(Number);
+    const d = new Date(a, m - 1 + k, 1);
+    $('#g-cal-mes').value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    renderCalendario();
+  };
+  $('#g-cal-mes').addEventListener('change', renderCalendario);
+  $('#g-cal-ant').onclick = () => moverMes(-1);
+  $('#g-cal-prox').onclick = () => moverMes(1);
   $('#g-data').addEventListener('change', render);
   $('#g-ant').onclick = () => { $('#g-data').value = somaDias(gData(), -1); render(); };
   $('#g-prox').onclick = () => { $('#g-data').value = somaDias(gData(), 1); render(); };
 
   $('#g-data').value = hoje();
+  $('#g-cal-mes').value = hoje().slice(0, 7);
   iniciar();
 })();

@@ -156,8 +156,23 @@
         </div>
         <p class="nota">Digite os totais do relatório do Anglo de cada caixa. A coluna "Caixa" é o que o operador lançou. A área tranca ao sair da aba ou após 10 minutos sem uso.</p>
         <div id="g-caixas" class="g-caixas"></div>
-        <h2 class="g-titulo">Últimos 14 dias</h2>
-        <div class="rolagem"><table class="g-hist" id="g-hist"></table></div>
+        <h2 class="g-titulo">Calendário da gerente</h2>
+        <div class="barra-filtros">
+          <button type="button" id="g-cal-ant" aria-label="Mês anterior">‹</button>
+          <input type="month" id="g-cal-mes" aria-label="Mês do calendário da gerente">
+          <button type="button" id="g-cal-prox" aria-label="Próximo mês">›</button>
+        </div>
+        <div id="g-cal-kpis" class="kpis"></div>
+        <div class="legenda-status">
+          <span class="st st-ok">confere</span>
+          <span class="st st-falta">falta</span>
+          <span class="st st-sobra">sobra</span>
+          <span class="st st-pendente">falta o Anglo</span>
+          <span class="st st-naoEnviou">não enviou</span>
+          <span class="st st-semVenda">sem venda</span>
+        </div>
+        <div class="rolagem"><div id="g-cal" class="calendario"></div></div>
+        <p class="nota">Diferença real de cada caixa: contagem do funcionário contra o relatório do Anglo. Toque num caixa para abrir o fechamento real do dia.</p>
       </div>
     </section>
   </main>
