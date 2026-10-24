@@ -82,7 +82,7 @@
     ].map((l) => ({ ...l, dif: l.func - l.sis }));
     return { esperado, sup, vale, formas, dif: formas.reduce((t, l) => t + l.dif, 0) };
   }
-  const abertos = new Set();
+  const fechados = new Set();
 
   let banco = null;
   let registros = [];
@@ -285,7 +285,7 @@
       </table></div>
       <p class="nota">Dinheiro esperado na gaveta = troco inicial ${formatar(a.trocoInicial || 0)}${fr.sup ? ` + suprimento ${formatar(fr.sup)}` : ''} + vendas em dinheiro ${formatar(a.dinheiro || 0)} − sangrias ${formatar(a.sangria || 0)} − despesas ${formatar(a.despesa || 0)}${fr.vale ? ` − vale-transporte ${formatar(fr.vale)}` : ''} = <b>${formatar(fr.esperado)}</b>. Os números do sistema vêm do relatório do Anglo; a gaveta, o cartão e o PIX vêm da contagem do funcionário.</p>`
       : '<p class="nota">Lance troco inicial, sangrias e despesas do relatório do Anglo e clique em "Salvar números do sistema".</p>';
-    return `<details class="g-real" data-real="${n}" ${abertos.has(n) ? 'open' : ''}>
+    return `<details class="g-real" data-real="${n}" ${fechados.has(n) ? '' : 'open'}>
       <summary>Fechamento real <span class="nota">· ${resumo}</span></summary>
       <div class="rolagem"><table class="g-tab">
         <thead><tr><th>Movimento</th><th>Funcionário</th><th>Sistema (Anglo)</th><th>Diferença</th></tr></thead>
@@ -330,7 +330,7 @@
   });
   $('#g-caixas').addEventListener('toggle', (e) => {
     const d = e.target.closest?.('[data-real]');
-    if (d) d.open ? abertos.add(+d.dataset.real) : abertos.delete(+d.dataset.real);
+    if (d) d.open ? fechados.delete(+d.dataset.real) : fechados.add(+d.dataset.real);
   }, true);
   $('#g-hist').addEventListener('click', (e) => {
     const b = e.target.closest('[data-dia]');
