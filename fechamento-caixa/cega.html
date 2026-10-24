@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Fechamento às Cegas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="operador.css">
+  <link rel="stylesheet" href="cega.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="marca">
+      <span class="marca-selo" aria-hidden="true">Cx</span>
+      <div>
+        <h1>Fechamento às Cegas</h1>
+        <p id="conexao">Conectando…</p>
+      </div>
+    </div>
+    <nav aria-label="Seções" id="nav" hidden>
+      <button class="aba ativa" data-aba="lancar" id="aba-btn-lancar">Lançar</button>
+      <button class="aba" data-aba="conferir" id="aba-btn-conferir">Conferência do gerente</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- LANÇAR (operador) -->
+    <section id="aba-lancar" class="painel">
+      <div id="hoje" class="hoje" aria-live="polite"></div>
+
+      <div class="op-grade">
+        <form id="form" class="op-form" autocomplete="off" novalidate>
+          <fieldset class="bloco">
+            <legend>Quem está fechando</legend>
+            <div class="op-linha2">
+              <label>Data <input type="date" id="f-data" required></label>
+              <label>Seu nome <input id="f-operador" placeholder="Ex.: Ana" required autocomplete="name"></label>
+            </div>
+            <div class="op-caixas" role="radiogroup" aria-label="Caixa" id="f-caixas"></div>
+            <p id="f-editando" class="nota" hidden></p>
+          </fieldset>
+
+          <fieldset class="bloco">
+            <legend>Dinheiro da gaveta</legend>
+            <div class="linha"><span>Troco inicial<small id="dica-troco">o que havia na gaveta ao abrir</small></span><input class="moeda" id="f-trocoInicial" data-k="trocoInicial" inputmode="decimal" placeholder="0,00"></div>
+            <div class="linha"><span>Suprimento<small>reforço de troco durante o dia</small></span><input class="moeda" id="f-suprimento" data-k="suprimento" inputmode="decimal" placeholder="0,00"></div>
+            <div class="linha"><span>Troco final<small>dinheiro contado na gaveta ao fechar</small></span><input class="moeda" id="f-trocoFinal" data-k="trocoFinal" inputmode="decimal" placeholder="0,00"></div>
+            <div class="sublista" id="lista-sangrias"></div>
+            <div class="linha"><span>Despesas<small>pagas com dinheiro do caixa</small></span><input class="moeda" id="f-despesas" data-k="despesas" inputmode="decimal" placeholder="0,00"></div>
+            <div class="linha linha-texto" id="linha-despesasDesc" hidden><span>Descrição da despesa<small>o que foi pago e para quem</small></span><input id="f-despesasDesc" placeholder="Ex.: água R$ 20 + correio R$ 50,25"></div>
+            <div class="linha"><span>Vale transporte</span><input class="moeda" id="f-valeTransporte" data-k="valeTransporte" inputmode="decimal" placeholder="0,00"></div>
+            <div class="linha-botoes"><button type="button" class="mini" id="btn-add-sangria">+ sangria</button></div>
+          </fieldset>
+
+          <fieldset class="bloco">
+            <legend>Maquininha e PIX</legend>
+            <p class="nota">Copie do comprovante de fechamento da maquininha e do app do banco.</p>
+            <div class="linha"><span>Crédito à vista</span><input class="moeda" id="f-credito" data-k="credito" inputmode="decimal" placeholder="0,00"></div>
+            <div class="linha"><span>Crédito parcelado</span><input class="moeda" id="f-creditoParcelado" data-k="creditoParcelado" inputmode="decimal" placeholder="0,00"></div>
+            <div class="linha"><span>Débito</span><input class="moeda" id="f-debito" data-k="debito" inputmode="decimal" placeholder="0,00"></div>
+            <div class="linha"><span>PIX</span><input class="moeda" id="f-pix" data-k="pix" inputmode="decimal" placeholder="0,00"></div>
+            <div class="sublista" id="lista-outros"></div>
+            <div class="linha-botoes"><button type="button" class="mini" id="btn-add-outro">+ outro recebimento</button></div>
+          </fieldset>
+
+          <fieldset class="bloco">
+            <legend>Observação</legend>
+            <label>Algo fora do normal hoje? <textarea id="f-obs" rows="2" placeholder="Ex.: troca de cliente, venda cancelada, maquininha caiu"></textarea></label>
+          </fieldset>
+        </form>
+
+        <aside class="op-resultado" aria-live="polite">
+          <div class="res-card r-semVenda" id="res-card">
+            <span id="res-rotulo">Escolha o caixa</span>
+            <dl class="res-contas">
+              <dt>Dinheiro contado</dt><dd id="res-din">R$ 0,00</dd>
+              <dt>Maquininha</dt><dd id="res-maq">R$ 0,00</dd>
+              <dt>PIX</dt><dd id="res-pix">R$ 0,00</dd>
+            </dl>
+          </div>
+          <p class="nota">A conferência com o sistema é feita depois, pelo gerente. Lance exatamente o que você contou.</p>
+          <button type="button" id="btn-enviar" class="primario enviar">Enviar fechamento</button>
+          <p class="nota" id="enviar-nota"></p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- CONFERÊNCIA (gerente) -->
+    <section id="aba-conferir" class="painel" hidden>
+      <div class="barra-filtros">
+        <button type="button" id="g-ant" aria-label="Dia anterior">‹</button>
+        <input type="date" id="g-data" aria-label="Dia">
+        <button type="button" id="g-prox" aria-label="Próximo dia">›</button>
+        <p class="resumo-linha" id="g-resumo"></p>
+      </div>
+      <p class="nota">Digite os totais do relatório do Anglo de cada caixa. Só quem edita esta página vê esta aba e os números do sistema.</p>
+      <div id="g-caixas" class="g-caixas"></div>
+      <h2 class="g-titulo">Últimos 14 dias</h2>
+      <div class="rolagem"><table class="g-hist" id="g-hist"></table></div>
+    </section>
+  </main>
+
+  <div id="aviso" class="aviso" role="status" hidden></div>
+  <script src="calc.js"></script>
+  <script src="cega.js"></script>
+</body>
+</html>

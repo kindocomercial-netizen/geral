@@ -1,0 +1,22 @@
+/* Fechamento às cegas: reaproveita styles.css e operador.css; aqui só a conferência do gerente. */
+.hoje-cx.st-ok { background: var(--ok-fundo); color: var(--ok); border-color: transparent; }
+
+.g-caixas { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; margin-bottom: 24px; }
+.g-cx { background: var(--cartao); border: 1px solid var(--linha); border-radius: var(--raio); padding: 14px 16px; display: grid; gap: 8px; min-width: 0; align-content: start; }
+.g-cx header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.g-cx h3 { margin: 0; font-size: 17px; }
+.g-cx .nota { margin: 0; }
+
+.g-tab, .g-hist { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.g-tab th, .g-hist th { text-align: left; font-weight: 600; color: var(--tinta-2); font-size: 12px; letter-spacing: 0.02em; padding: 4px 4px 6px; border-bottom: 1px solid var(--linha); }
+.g-tab td, .g-hist td { padding: 4px; border-bottom: 1px solid var(--linha); vertical-align: middle; }
+.g-tab tfoot td { border-bottom: 0; padding-top: 8px; font-weight: 600; }
+.g-tab .num, .g-hist .num { font-family: var(--numeros); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.g-tab th:nth-child(n+2) { text-align: right; }
+.g-tab input.moeda { width: 100%; min-width: 84px; padding: 6px 8px; font-size: 14px; }
+.g-salvar { justify-self: start; }
+
+.g-titulo { font-size: 15px; margin: 8px 0 8px; }
+.g-hist td { white-space: nowrap; }
+.link-dia { font: inherit; font-family: var(--numeros); background: none; border: 0; padding: 0; color: var(--acento); text-decoration: underline; cursor: pointer; }
+.barra-filtros input[type=date] { width: auto; }
