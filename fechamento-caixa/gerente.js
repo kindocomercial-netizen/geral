@@ -6,13 +6,12 @@
   const { paraCentavos, formatar } = window.Calc;
   const QTD_CAIXAS = 3;
   const TOL = 200;
+  // No Anglo o cartão sai num total só (crédito, parcelado e débito juntos); só o PIX vem separado.
   const FORMAS = [
     { id: 'dinheiro', nome: 'Dinheiro' },
-    { id: 'credito', nome: 'Crédito à vista' },
-    { id: 'creditoParcelado', nome: 'Crédito parcelado' },
-    { id: 'debito', nome: 'Débito' },
+    { id: 'cartao', nome: 'Cartão (crédito + débito)' },
     { id: 'pix', nome: 'PIX' },
-    { id: 'outros', nome: 'Outros (crediário…)' },
+    { id: 'outros', nome: 'Outros (crediário, cheque)' },
   ];
 
   const $ = (s, el = document) => el.querySelector(s);
@@ -41,7 +40,7 @@
     const g = (k) => r[k] || 0;
     return {
       dinheiro: g('trocoFinal') + somar(r.sangrias) + g('despesas') + g('valeTransporte') - g('trocoInicial') - g('suprimento'),
-      credito: g('credito'), creditoParcelado: g('creditoParcelado'), debito: g('debito'), pix: g('pix'),
+      cartao: g('cartao') + g('credito') + g('creditoParcelado') + g('debito'), pix: g('pix'),
       outros: somar(r.outros),
     };
   }

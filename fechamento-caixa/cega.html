@@ -57,9 +57,7 @@
           <fieldset class="bloco">
             <legend>Maquininha e PIX</legend>
             <p class="nota">Copie do comprovante de fechamento da maquininha e do app do banco.</p>
-            <div class="linha"><span>Crédito à vista</span><input class="moeda" id="f-credito" data-k="credito" inputmode="decimal" placeholder="0,00"></div>
-            <div class="linha"><span>Crédito parcelado</span><input class="moeda" id="f-creditoParcelado" data-k="creditoParcelado" inputmode="decimal" placeholder="0,00"></div>
-            <div class="linha"><span>Débito</span><input class="moeda" id="f-debito" data-k="debito" inputmode="decimal" placeholder="0,00"></div>
+            <div class="linha"><span>Cartão<small>total do fechamento da maquininha (crédito + débito)</small></span><input class="moeda" id="f-cartao" data-k="cartao" inputmode="decimal" placeholder="0,00"></div>
             <div class="linha"><span>PIX</span><input class="moeda" id="f-pix" data-k="pix" inputmode="decimal" placeholder="0,00"></div>
             <div class="sublista" id="lista-outros"></div>
             <div class="linha-botoes"><button type="button" class="mini" id="btn-add-outro">+ outro recebimento</button></div>
@@ -76,7 +74,7 @@
             <span id="res-rotulo">Escolha o caixa</span>
             <dl class="res-contas">
               <dt>Dinheiro contado</dt><dd id="res-din">R$ 0,00</dd>
-              <dt>Maquininha</dt><dd id="res-maq">R$ 0,00</dd>
+              <dt>Cartão</dt><dd id="res-maq">R$ 0,00</dd>
               <dt>PIX</dt><dd id="res-pix">R$ 0,00</dd>
             </dl>
           </div>

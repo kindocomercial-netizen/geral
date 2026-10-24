@@ -7,15 +7,14 @@
   const TOL = 200; // R$ 2,00
   const LOCAL = 'fechamento-cego:';
   const DIAS = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
-  const CAMPOS = ['trocoInicial', 'suprimento', 'trocoFinal', 'despesas', 'valeTransporte', 'credito', 'creditoParcelado', 'debito', 'pix'];
+  const CAMPOS = ['trocoInicial', 'suprimento', 'trocoFinal', 'despesas', 'valeTransporte', 'cartao', 'pix'];
   // Linhas da conferência: o que o caixa contou x o campo do Anglo.
+  // No Anglo o cartão sai num total só (crédito, parcelado e débito juntos); só o PIX vem separado.
   const FORMAS = [
     { id: 'dinheiro', nome: 'Dinheiro' },
-    { id: 'credito', nome: 'Crédito à vista' },
-    { id: 'creditoParcelado', nome: 'Crédito parcelado' },
-    { id: 'debito', nome: 'Débito' },
+    { id: 'cartao', nome: 'Cartão (crédito + débito)' },
     { id: 'pix', nome: 'PIX' },
-    { id: 'outros', nome: 'Outros (crediário…)' },
+    { id: 'outros', nome: 'Outros (crediário, cheque)' },
   ];
 
   const $ = (s, el = document) => el.querySelector(s);
@@ -46,7 +45,7 @@
     const g = (k) => r[k] || 0;
     return {
       dinheiro: g('trocoFinal') + somar(r.sangrias) + g('despesas') + g('valeTransporte') - g('trocoInicial') - g('suprimento'),
-      credito: g('credito'), creditoParcelado: g('creditoParcelado'), debito: g('debito'), pix: g('pix'),
+      cartao: g('cartao') + g('credito') + g('creditoParcelado') + g('debito'), pix: g('pix'),
       outros: somar(r.outros),
     };
   }
@@ -102,7 +101,7 @@
 
   function vazio() {
     return { trocoInicial: 0, suprimento: 0, trocoFinal: 0, despesas: 0, despesasDesc: '', valeTransporte: 0,
-      credito: 0, creditoParcelado: 0, debito: 0, pix: 0, sangrias: [], outros: [], obs: '' };
+      cartao: 0, pix: 0, sangrias: [], outros: [], obs: '' };
   }
   const dataSel = () => $('#f-data').value;
 
@@ -168,9 +167,9 @@
   function atualizar() {
     const ct = contado(c);
     $('#res-din').textContent = formatar(ct.dinheiro);
-    $('#res-maq').textContent = formatar(ct.credito + ct.creditoParcelado + ct.debito);
+    $('#res-maq').textContent = formatar(ct.cartao);
     $('#res-pix').textContent = formatar(ct.pix);
-    const preenchido = c.trocoFinal || c.credito || c.creditoParcelado || c.debito || c.pix || c.sangrias.some(Boolean);
+    const preenchido = c.trocoFinal || c.cartao || c.pix || c.sangrias.some(Boolean);
     $('#res-card').className = 'res-card ' + (existente ? 'r-ok' : caixa && preenchido ? 'r-pendente' : 'r-semVenda');
     $('#res-rotulo').textContent = !caixa ? 'Escolha o caixa'
       : existente ? `Enviado às ${hora(existente.enviadoEm)}, aguardando conferência` : preenchido ? 'Pronto para enviar' : 'Lance o que você contou';
