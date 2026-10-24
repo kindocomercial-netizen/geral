@@ -21,7 +21,7 @@
     </div>
     <nav aria-label="Seções" id="nav" hidden>
       <button class="aba ativa" data-aba="lancar" id="aba-btn-lancar">Lançar</button>
-      <button class="aba" data-aba="conferir" id="aba-btn-conferir">Conferência do gerente</button>
+      <button class="aba" data-aba="conferir" id="aba-btn-conferir">Gerente</button>
     </nav>
   </header>
 
@@ -89,16 +89,28 @@
 
     <!-- CONFERÊNCIA (gerente) -->
     <section id="aba-conferir" class="painel" hidden>
+      <form id="g-trava" class="g-trava bloco" autocomplete="off">
+        <h2 id="g-trava-titulo">Área da gerente</h2>
+        <p class="nota" id="g-trava-texto">Digite o PIN para ver a conferência com os números do sistema.</p>
+        <label>PIN <input id="g-pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off"></label>
+        <label id="g-pin2-rotulo" hidden>Repita o PIN <input id="g-pin2" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off"></label>
+        <button type="submit" class="primario" id="g-entrar">Entrar</button>
+        <p class="nota" id="g-trava-erro" role="alert"></p>
+      </form>
+      <div id="g-conteudo" hidden>
       <div class="barra-filtros">
         <button type="button" id="g-ant" aria-label="Dia anterior">‹</button>
         <input type="date" id="g-data" aria-label="Dia">
         <button type="button" id="g-prox" aria-label="Próximo dia">›</button>
         <p class="resumo-linha" id="g-resumo"></p>
+        <button type="button" class="mini" id="g-trocar">Trocar PIN</button>
+        <button type="button" class="mini" id="g-trancar">Trancar</button>
       </div>
-      <p class="nota">Digite os totais do relatório do Anglo de cada caixa. Só quem edita esta página vê esta aba e os números do sistema.</p>
+      <p class="nota">Digite os totais do relatório do Anglo de cada caixa. A área tranca sozinha depois de 10 minutos sem uso.</p>
       <div id="g-caixas" class="g-caixas"></div>
       <h2 class="g-titulo">Últimos 14 dias</h2>
       <div class="rolagem"><table class="g-hist" id="g-hist"></table></div>
+      </div>
     </section>
   </main>
 

@@ -20,3 +20,9 @@
 .g-hist td { white-space: nowrap; }
 .link-dia { font: inherit; font-family: var(--numeros); background: none; border: 0; padding: 0; color: var(--acento); text-decoration: underline; cursor: pointer; }
 .barra-filtros input[type=date] { width: auto; }
+
+.g-trava { max-width: 360px; display: grid; gap: 10px; }
+.g-trava h2 { margin: 0; font-size: 17px; }
+.g-trava .nota { margin: 0; }
+.g-trava input { letter-spacing: 0.3em; font-family: var(--numeros); }
+#g-trava-erro { color: var(--falta); min-height: 1.2em; }

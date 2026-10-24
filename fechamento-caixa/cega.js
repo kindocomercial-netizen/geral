@@ -88,10 +88,7 @@
     } catch {}
     if (gerente) {
       $('#nav').hidden = false;
-      db.collection('anglo').orderBy('data', 'desc').limit(400).onSnapshot((snap) => {
-        anglo = Object.fromEntries(snap.docs.map((d) => [d.id, d.data()]));
-        renderGerente();
-      }, () => {});
+      prepararTrava();
     }
     atualizar();
   }
@@ -295,8 +292,104 @@
     return { ...comparar(r, a), r, a };
   }
 
+  // ---------- PIN da gerente ----------
+  // A tranca impede a olhada casual quando o caixa usa a mesma conta da gerente. Os números do
+  // sistema só são buscados depois do PIN certo. Não substitui contas separadas.
+  let pinSalvo = null;      // { sal, hash } guardado em gerencia/pin
+  let liberado = false;
+  let pararAnglo = null;
+  let trocandoPin = false;
+
+  async function hashPin(pin, sal) {
+    const bytes = new TextEncoder().encode(sal + ':' + pin);
+    if (crypto?.subtle) {
+      const h = await crypto.subtle.digest('SHA-256', bytes);
+      return [...new Uint8Array(h)].map((b) => b.toString(16).padStart(2, '0')).join('');
+    }
+    let h = 2166136261;
+    for (const b of bytes) h = Math.imul(h ^ b, 16777619) >>> 0;
+    return 'f' + h.toString(16);
+  }
+
+  async function prepararTrava() {
+    try {
+      const d = await banco.doc('gerencia/pin').get();
+      pinSalvo = d.exists ? d.data() : null;
+    } catch { pinSalvo = null; }
+    mostrarTrava();
+  }
+
+  function mostrarTrava() {
+    const criar = !pinSalvo || trocandoPin;
+    $('#g-trava').hidden = liberado && !trocandoPin;
+    $('#g-conteudo').hidden = !liberado || trocandoPin;
+    $('#g-trava-titulo').textContent = trocandoPin ? 'Trocar o PIN' : criar ? 'Crie o PIN da gerente' : 'Área da gerente';
+    $('#g-trava-texto').textContent = criar
+      ? 'Escolha um PIN de 4 a 6 números. Ele será pedido sempre que alguém abrir esta área.'
+      : 'Digite o PIN para ver a conferência com os números do sistema.';
+    $('#g-pin2-rotulo').hidden = !criar;
+    $('#g-entrar').textContent = criar ? 'Salvar PIN' : 'Entrar';
+    $('#g-trava-erro').textContent = '';
+    $('#g-pin').value = ''; $('#g-pin2').value = '';
+  }
+
+  function liberar() {
+    liberado = true;
+    trocandoPin = false;
+    mostrarTrava();
+    if (!pararAnglo) {
+      pararAnglo = banco.collection('anglo').orderBy('data', 'desc').limit(400).onSnapshot((snap) => {
+        anglo = Object.fromEntries(snap.docs.map((d) => [d.id, d.data()]));
+        renderGerente();
+      }, () => {});
+    }
+    renderGerente();
+    tocarRelogio();
+  }
+
+  function trancar() {
+    liberado = false;
+    trocandoPin = false;
+    if (typeof pararAnglo === 'function') pararAnglo();
+    pararAnglo = null;
+    anglo = {};
+    $('#g-caixas').innerHTML = '';
+    $('#g-hist').innerHTML = '';
+    mostrarTrava();
+  }
+
+  // Tranca sozinha após 10 minutos sem mexer na área.
+  function tocarRelogio() {
+    clearTimeout(tocarRelogio.t);
+    if (liberado) tocarRelogio.t = setTimeout(trancar, 10 * 60 * 1000);
+  }
+  ['click', 'input', 'keydown'].forEach((ev) => $('#aba-conferir').addEventListener(ev, tocarRelogio));
+
+  $('#g-trava').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const pin = $('#g-pin').value.trim();
+    const erro = $('#g-trava-erro');
+    if (!/^\d{4,6}$/.test(pin)) { erro.textContent = 'O PIN tem de 4 a 6 números.'; return; }
+    if (!pinSalvo || trocandoPin) {
+      if (pin !== $('#g-pin2').value.trim()) { erro.textContent = 'Os dois PINs não são iguais.'; return; }
+      const sal = Math.random().toString(36).slice(2, 10);
+      const novo = { sal, hash: await hashPin(pin, sal), alteradoEm: new Date().toISOString() };
+      try {
+        await banco.doc('gerencia/pin').set(novo);
+        pinSalvo = novo;
+        avisar('PIN salvo.');
+        liberar();
+      } catch { erro.textContent = 'Não foi possível salvar o PIN. Só quem edita esta página pode definir o PIN.'; }
+      return;
+    }
+    if ((await hashPin(pin, pinSalvo.sal)) === pinSalvo.hash) liberar();
+    else { erro.textContent = 'PIN errado.'; $('#g-pin').value = ''; }
+  });
+  $('#g-trancar').onclick = trancar;
+  $('#g-trocar').onclick = () => { trocandoPin = true; mostrarTrava(); };
+
   function renderGerente() {
-    if (!gerente || $('#aba-conferir').hidden) return;
+    if (!gerente || !liberado || $('#aba-conferir').hidden) return;
     const data = gData();
     let n0 = 0, dTot = 0;
     $('#g-caixas').innerHTML = Array.from({ length: QTD_CAIXAS }, (_, i) => i + 1).map((n) => {
@@ -376,6 +469,7 @@
     $$('.aba').forEach((b) => b.classList.toggle('ativa', b.dataset.aba === nome));
     $$('.painel').forEach((p) => (p.hidden = p.id !== 'aba-' + nome));
     if (nome === 'conferir') renderGerente();
+    else if (liberado) trancar();
   }
   $$('.aba').forEach((b) => (b.onclick = () => trocarAba(b.dataset.aba)));
 
