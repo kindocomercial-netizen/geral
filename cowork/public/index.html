@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Agenda do Cowork Kindo</title>
+<meta name="description" content="Reserve sua cadeira no cowork de cabeleireiro da Perfumaria Kindo, na Lapa.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --bg:#FFFFFF; --surface:#FCE4F0; --surface-2:#FFF6FA; --fg:#2E2229; --muted:#6E5F68;
+  --line:#EBD7E2; --ameixa:#9A3D80; --profundo:#5C1F4B; --rosa:#E5007E; --on-rosa:#FFFFFF;
+  --ok:#1E7B4A; --ok-bg:#E3F4EA; --warn:#A35A00; --warn-bg:#FFF1DC; --info:#2B5C9E; --info-bg:#E5EEFA; --busy:#F3E6EE;
+  --display:"Gilda Display","Times New Roman",Georgia,serif;
+  --sans:Figtree,"Segoe UI",Arial,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#1D1219; --surface:#2E1B28; --surface-2:#25161F; --fg:#F6E9F0; --muted:#C2AEBA;
+  --line:#47303F; --ameixa:#E59BCF; --profundo:#3A1430; --rosa:#FF4FA7; --on-rosa:#1D1219;
+  --ok:#7FD6A3; --ok-bg:#183326; --warn:#F5B65C; --warn-bg:#3A2A12; --info:#9CC3F5; --info-bg:#172638; --busy:#33202D; color-scheme:dark}}
+*{box-sizing:border-box}
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.45}
+[hidden]{display:none!important}
+.wrap{max-width:980px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px;display:flex;flex-direction:column;gap:20px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,5vw,40px);line-height:1.1;margin:0;color:var(--ameixa);text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0}
+.precos{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{border:1.5px solid var(--line);border-radius:999px;padding:6px 14px;font-weight:700;font-size:14px;background:var(--surface-2);color:var(--fg);font-family:var(--sans)}
+.chip b{color:var(--rosa);font-variant-numeric:tabular-nums}
+button.chip{cursor:pointer;min-height:36px}
+.dias{display:flex;gap:8px;align-items:center}
+.dias .lista{display:flex;gap:6px;overflow-x:auto;flex:1;min-width:0;padding-bottom:4px}
+.dia{flex:0 0 auto;min-width:64px;border:1.5px solid var(--line);background:var(--bg);color:var(--fg);border-radius:16px;padding:8px 10px;text-align:center;cursor:pointer;font-family:var(--sans)}
+.dia small{display:block;color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.dia strong{font-size:20px;font-variant-numeric:tabular-nums}
+.dia[aria-pressed="true"]{background:var(--profundo);border-color:var(--profundo);color:#fff}
+.dia[aria-pressed="true"] small{color:#FFC6E3}
+.dia:disabled{opacity:.45;cursor:not-allowed}
+.nav{width:44px;height:44px;border-radius:999px;border:1.5px solid var(--line);background:var(--bg);color:var(--fg);font-size:20px;cursor:pointer;flex:0 0 auto}
+.nav:disabled{opacity:.4}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--rosa);outline-offset:2px}
+.resumo{display:flex;flex-wrap:wrap;gap:10px}
+.resumo div{background:var(--surface);border-radius:16px;padding:10px 16px;min-width:130px}
+.resumo span{display:block;font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.resumo b{font-size:20px;font-variant-numeric:tabular-nums}
+.grade-box{overflow-x:auto;border:1.5px solid var(--line);border-radius:16px}
+table{border-collapse:separate;border-spacing:0;width:100%;min-width:560px}
+th,td{padding:6px;border-bottom:1px solid var(--line)}
+thead th{background:var(--surface-2);font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);text-align:left;padding:10px 8px}
+tbody th{font-variant-numeric:tabular-nums;font-weight:700;width:76px;color:var(--ameixa);text-align:left;padding-left:12px}
+tr:last-child th,tr:last-child td{border-bottom:none}
+.slot{width:100%;min-height:48px;border-radius:12px;border:1.5px dashed var(--line);background:transparent;color:var(--muted);font-family:var(--sans);font-weight:600;cursor:pointer;text-align:left;padding:6px 10px}
+.slot:hover{border-color:var(--rosa);color:var(--rosa)}
+.slot.sel{border-style:solid;border-color:var(--rosa);background:var(--surface);color:var(--fg)}
+.slot.ocup{border:none;background:var(--busy);color:var(--fg)}
+.slot.ocup .n{font-weight:700;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot:disabled{cursor:default}
+.slot.passado{opacity:.5}
+.pill{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;margin-top:2px}
+.pill.pago{background:var(--ok-bg);color:var(--ok)}
+.pill.pendente{background:var(--warn-bg);color:var(--warn)}
+.pill.comprovante{background:var(--info-bg);color:var(--info)}
+.painel{background:var(--surface);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.painel h2{font-family:var(--display);font-weight:400;font-size:26px;margin:0;color:var(--ameixa);text-wrap:balance}
+.campos{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+label{display:flex;flex-direction:column;gap:4px;font-weight:600;font-size:13px;color:var(--muted)}
+input,select{font:inherit;font-size:16px;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);color:var(--fg);min-height:44px;width:100%}
+input[type=file]{padding:8px}
+.tipos{display:flex;gap:8px;flex-wrap:wrap}
+.tipo{border:1.5px solid var(--line);background:var(--bg);color:var(--fg);border-radius:999px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer;min-height:44px}
+.tipo[aria-pressed="true"]{background:var(--ameixa);border-color:var(--ameixa);color:#fff}
+.acoes{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{border:none;border-radius:999px;padding:12px 22px;font:inherit;font-weight:800;cursor:pointer;min-height:44px}
+.btn.prim{background:var(--rosa);color:var(--on-rosa)}
+.btn.sec{background:transparent;border:1.5px solid var(--line);color:var(--fg)}
+.btn.perigo{background:transparent;border:1.5px solid var(--rosa);color:var(--rosa)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.aviso{border-radius:12px;padding:10px 14px;font-weight:600}
+.aviso.erro{background:var(--warn-bg);color:var(--warn)}
+.aviso.ok{background:var(--ok-bg);color:var(--ok)}
+.total{font-size:22px;font-weight:800;color:var(--rosa);font-variant-numeric:tabular-nums}
+.regras{color:var(--muted);font-size:13px;margin:0;padding-left:18px}
+.vazio{color:var(--muted);text-align:center;padding:24px}
+.envio{background:var(--bg);border:1.5px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.envio h3{margin:0;font-size:16px}
+.comp-view{max-width:100%;border-radius:12px;border:1.5px solid var(--line)}
+.comp-pdf{width:100%;height:480px;border:1.5px solid var(--line);border-radius:12px}
+footer{color:var(--muted);font-size:13px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.link{background:none;border:none;color:var(--ameixa);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer;padding:8px 0}
+@media (prefers-reduced-motion:no-preference){.slot,.dia{transition:background .15s,border-color .15s}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Agenda do Cowork</h1>
+      <p class="sub">Andar de cima da Perfumaria Kindo · Rua Doze de Outubro, 465 · Lapa</p>
+    </div>
+    <div class="precos" id="precos">
+      <span class="chip">Hora <b id="pHora">R$ 20</b></span>
+      <span class="chip">Diária 9h às 18h <b id="pDiaria">R$ 120</b></span>
+    </div>
+  </header>
+
+  <div id="donoBar" class="aviso ok" hidden></div>
+
+  <div class="dias">
+    <button class="nav" id="ant" type="button" aria-label="Semana anterior">‹</button>
+    <div class="lista" id="dias"></div>
+    <button class="nav" id="prox" type="button" aria-label="Próxima semana">›</button>
+  </div>
+
+  <div class="resumo" id="resumo" hidden></div>
+  <div id="status" class="aviso erro" hidden></div>
+
+  <div class="grade-box"><table>
+    <thead><tr><th>Horário</th><th>Cabeleireiro 1</th><th>Cabeleireiro 2</th><th>Manicure</th></tr></thead>
+    <tbody id="grade"><tr><td colspan="4" class="vazio">Carregando a agenda…</td></tr></tbody>
+  </table></div>
+
+  <section class="painel" id="painel" aria-live="polite">
+    <h2 id="pTitulo">Reservar um horário</h2>
+    <p id="pDica" style="margin:0;color:var(--muted)">Toque num horário livre da grade para começar.</p>
+    <div id="form" hidden>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="tipos" role="group" aria-label="Tipo de reserva">
+          <button class="tipo" id="tHora" aria-pressed="true" type="button">Por hora</button>
+          <button class="tipo" id="tDiaria" aria-pressed="false" type="button">Diária (9h às 18h)</button>
+        </div>
+        <div class="campos">
+          <label for="fHoras">Quantas horas<select id="fHoras"></select></label>
+          <label for="fNome">Nome do profissional<input id="fNome" autocomplete="name" placeholder="Seu nome"></label>
+          <label for="fTel">WhatsApp<input id="fTel" inputmode="tel" autocomplete="tel" placeholder="(11) 90000-0000"></label>
+        </div>
+        <div class="acoes">
+          <span class="total" id="fTotal">R$ 20</span>
+          <button class="btn prim" id="fSalvar" type="button">Reservar</button>
+          <button class="btn sec" id="fCancelar" type="button">Limpar</button>
+        </div>
+        <div id="fMsg" class="aviso" hidden></div>
+        <ul class="regras">
+          <li>A reserva só fica garantida depois do pagamento antecipado (dinheiro, PIX, débito ou crédito). Se pagar por PIX, anexe o comprovante aqui mesmo.</li>
+          <li>A diária vale das 9h às 18h no mesmo posto.</li>
+          <li>Cancelamento com 24h de antecedência vira crédito; depois disso, o valor não volta.</li>
+          <li>Com valor em aberto de uso anterior, não dá para reservar de novo até quitar.</li>
+        </ul>
+      </div>
+    </div>
+    <div id="det" hidden></div>
+  </section>
+
+  <footer>
+    <span>Dúvidas e cancelamentos: WhatsApp <b>(11) 99946-4365</b></span>
+    <button class="link" id="btnDono" type="button">Área do dono</button>
+  </footer>
+</div>
+
+<script>
+(function(){
+'use strict';
+const POSTOS=[{id:'cab1',nome:'Cabeleireiro 1'},{id:'cab2',nome:'Cabeleireiro 2'},{id:'mani',nome:'Manicure'}];
+const DS=['dom','seg','ter','qua','qui','sex','sáb'];
+const SLOTS=10, HORA_INI=9, DIA_H=9;
+const STATUS={pendente:'Aguardando pagamento',comprovante:'Comprovante enviado',pago:'Pago'};
+let precos={hora:20,diaria:120};
+let senha=null, dono=false;
+let semana=0, dataSel=null, reservas=[], sel=null, tipo='hora', timer=null, ultimoComp=null;
+const $=id=>document.getElementById(id);
+const brl=v=>'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:2});
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const hoje=()=>{const d=new Date();d.setHours(0,0,0,0);return d};
+const parse=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const fmt=s=>{const d=parse(s);return DS[d.getDay()]+', '+String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')};
+const soDig=t=>(t||'').replace(/\D/g,'');
+const rotulo=i=>String(HORA_INI+i).padStart(2,'0')+':00';
+const slotsDe=s=>parse(s).getDay()===0?0:SLOTS;
+function passou(i){const d=parse(dataSel);d.setHours(HORA_INI+i,0,0,0);return d<new Date()}
+function msg(el,txt,t){el.textContent=txt||'';el.className='aviso '+(t||'erro');el.hidden=!txt}
+
+// Reservas feitas neste aparelho (para anexar comprovante depois).
+function minhas(){try{return JSON.parse(localStorage.getItem('cowork-minhas')||'{}')}catch(e){return {}}}
+function guardarMinha(id,tk){try{const m=minhas();m[id]=tk;localStorage.setItem('cowork-minhas',JSON.stringify(m))}catch(e){}}
+
+async function api(caminho,opts){
+  opts=opts||{};const h=Object.assign({},opts.headers||{});
+  if(senha)h['authorization']='Bearer '+senha;
+  const r=await fetch(caminho,Object.assign({},opts,{headers:h}));
+  let corpo=null;try{corpo=await r.clone().json()}catch(e){}
+  if(!r.ok)throw new Error((corpo&&corpo.erro)||'Não consegui falar com a agenda agora. Tente de novo.');
+  return corpo;
+}
+
+function ocupacao(){const m={};for(const r of reservas)for(let h=r.inicio;h<r.inicio+r.horas;h++)m[r.posto+'@'+h]=r;return m}
+function livresDesde(posto,ini){const oc=ocupacao(),n=slotsDe(dataSel);let c=0;for(let h=ini;h<n&&!oc[posto+'@'+h];h++)c++;return c}
+function inicioSel(){return tipo==='diaria'?0:(sel?sel.inicio:0)}
+function horasSel(){if(!sel)return 0;return tipo==='diaria'?DIA_H:Number($('fHoras').value||1)}
+function valorSel(){return tipo==='diaria'?precos.diaria:horasSel()*precos.hora}
+function diariaLivre(){return sel&&livresDesde(sel.posto,0)>=DIA_H&&!passou(0)}
+
+function renderDias(){
+  const box=$('dias');box.textContent='';
+  const base=hoje();base.setDate(base.getDate()+semana*7);
+  for(let i=0;i<7;i++){const d=new Date(base);d.setDate(base.getDate()+i);const s=iso(d);
+    const b=document.createElement('button');b.className='dia';b.type='button';
+    b.setAttribute('aria-pressed',String(s===dataSel));
+    b.innerHTML='<small>'+DS[d.getDay()]+'</small><strong>'+String(d.getDate()).padStart(2,'0')+'</strong>';
+    if(d.getDay()===0){b.disabled=true;b.title='Loja fechada aos domingos'}
+    b.onclick=()=>escolherDia(s);box.appendChild(b)}
+  $('ant').disabled=semana<=0;
+}
+
+function renderGrade(){
+  const tb=$('grade');tb.textContent='';
+  const n=slotsDe(dataSel);
+  if(!n){tb.innerHTML='<tr><td colspan="4" class="vazio">Domingo a loja fica fechada.</td></tr>';return}
+  const oc=ocupacao();
+  for(let i=0;i<n;i++){
+    const tr=document.createElement('tr');const th=document.createElement('th');th.textContent=rotulo(i);tr.appendChild(th);
+    for(const p of POSTOS){const td=document.createElement('td');const b=document.createElement('button');b.type='button';b.className='slot';
+      const r=oc[p.id+'@'+i];
+      if(r){b.classList.add('ocup');const first=r.inicio===i;
+        b.innerHTML='<span class="n"></span>'+(first?'<span class="pill '+r.status+'">'+STATUS[r.status]+'</span>':'');
+        b.querySelector('.n').textContent=first?(r.nome+(r.tipo==='diaria'?' · diária':'')):'↳ '+r.nome;
+        b.setAttribute('aria-label',rotulo(i)+' '+p.nome+': reservado por '+r.nome);
+        b.onclick=()=>abrirDetalhe(r.id)}
+      else{b.textContent=passou(i)?'—':'Livre';
+        if(passou(i)){b.classList.add('passado');b.disabled=true}
+        if(sel&&sel.posto===p.id&&i>=inicioSel()&&i<inicioSel()+horasSel())b.classList.add('sel');
+        b.setAttribute('aria-label',rotulo(i)+' '+p.nome+': livre');
+        b.onclick=()=>escolherSlot(p.id,i)}
+      td.appendChild(b);tr.appendChild(td)}
+    tb.appendChild(tr)}
+}
+
+function renderResumo(){
+  const el=$('resumo');if(!dono){el.hidden=true;return}
+  let horas=0,tot=0,pago=0,comp=0;for(const r of reservas){horas+=r.horas;tot+=r.valor||0;if(r.status==='pago')pago+=r.valor||0;if(r.status==='comprovante')comp++}
+  el.innerHTML='';const add=(l,v)=>{const d=document.createElement('div');d.innerHTML='<span></span><b></b>';d.children[0].textContent=l;d.children[1].textContent=v;el.appendChild(d)};
+  add('Horas reservadas',horas+'h');add('Total do dia',brl(tot));add('Já pago',brl(pago));add('A receber',brl(tot-pago));add('Comprovantes a conferir',String(comp));el.hidden=false;
+}
+
+function renderPrecos(){
+  $('pHora').textContent=brl(precos.hora);$('pDiaria').textContent=brl(precos.diaria);
+  let ed=$('edPrecos');
+  if(dono&&!ed){ed=document.createElement('button');ed.id='edPrecos';ed.className='chip';ed.type='button';ed.textContent='Alterar valores';ed.onclick=editarPrecos;$('precos').appendChild(ed)}
+  if(!dono&&ed)ed.remove();
+}
+function editarPrecos(){
+  const ed=$('edPrecos');ed.hidden=true;
+  const f=document.createElement('div');f.className='acoes';
+  f.innerHTML='<label for="eHora">Hora<input id="eHora" inputmode="decimal" style="width:100px"></label><label for="eDiaria">Diária<input id="eDiaria" inputmode="decimal" style="width:100px"></label>';
+  $('precos').appendChild(f);$('eHora').value=precos.hora;$('eDiaria').value=precos.diaria;
+  const ok=document.createElement('button');ok.className='btn prim';ok.type='button';ok.textContent='Salvar valores';
+  const no=document.createElement('button');no.className='btn sec';no.type='button';no.textContent='Fechar';
+  no.onclick=()=>{f.remove();ed.hidden=false};
+  ok.onclick=async()=>{const h=Number(String($('eHora').value).replace(',','.')),d=Number(String($('eDiaria').value).replace(',','.'));
+    if(!(h>0&&d>0))return;ok.disabled=true;
+    try{const r=await api('/api/dono/precos',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({hora:h,diaria:d})});precos=r.precos;renderPrecos();f.remove();ed.hidden=false}
+    catch(e){ok.disabled=false;msg($('status'),e.message)}};
+  f.append(ok,no);
+}
+
+function atualizaForm(){
+  $('tHora').setAttribute('aria-pressed',String(tipo==='hora'));$('tDiaria').setAttribute('aria-pressed',String(tipo==='diaria'));
+  $('fHoras').disabled=tipo==='diaria';
+  $('fTotal').textContent=brl(valorSel());
+  if(sel){const p=POSTOS.find(x=>x.id===sel.posto);$('pTitulo').textContent=p.nome+' · '+fmt(dataSel)+' · '+rotulo(inicioSel())+' às '+rotulo(inicioSel()+horasSel())}
+  const bloq=tipo==='diaria'&&!diariaLivre();$('fSalvar').disabled=bloq;
+  msg($('fMsg'),bloq?'A diária precisa do posto livre das 9h às 18h neste dia. Escolha outro dia ou outro posto.':'');
+  renderGrade();
+}
+function escolherSlot(posto,i){
+  $('det').hidden=true;const max=livresDesde(posto,i);sel={posto,inicio:i,max};
+  const s=$('fHoras');s.textContent='';for(let h=1;h<=max;h++){const o=document.createElement('option');o.value=h;o.textContent=h+(h>1?' horas':' hora');s.appendChild(o)}
+  $('pDica').hidden=true;$('form').hidden=false;atualizaForm();
+}
+function limpar(){sel=null;$('form').hidden=true;$('det').hidden=true;$('pDica').hidden=false;$('pTitulo').textContent='Reservar um horário';renderGrade()}
+
+// Fotos grandes são reduzidas antes do envio.
+async function prepararArquivo(f){
+  if(!f.type.startsWith('image/')||f.type==='image/heic'||f.type==='image/heif'||f.size<900*1024)return f;
+  try{
+    const bmp=await createImageBitmap(f);const k=Math.min(1,1600/Math.max(bmp.width,bmp.height));
+    const c=document.createElement('canvas');c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);
+    c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+    const b=await new Promise(res=>c.toBlob(res,'image/jpeg',0.82));
+    return b?new File([b],'comprovante.jpg',{type:'image/jpeg'}):f;
+  }catch(e){return f}
+}
+
+function caixaEnvio(id,tk){
+  const box=document.createElement('div');box.className='envio';
+  box.innerHTML='<h3>Anexar comprovante de pagamento</h3><label for="arq">Foto ou PDF do comprovante (até 5 MB)<input id="arq" type="file" accept="image/*,application/pdf"></label>';
+  const ac=document.createElement('div');ac.className='acoes';
+  const b=document.createElement('button');b.className='btn prim';b.type='button';b.textContent='Enviar comprovante';
+  const m=document.createElement('div');m.className='aviso';m.hidden=true;
+  ac.appendChild(b);box.append(ac,m);
+  b.onclick=async()=>{const inp=box.querySelector('#arq');const f=inp.files&&inp.files[0];
+    if(!f){msg(m,'Escolha a foto ou o PDF do comprovante.');return}
+    b.disabled=true;msg(m,'Enviando…','ok');
+    try{const arq=await prepararArquivo(f);
+      if(arq.size>5*1024*1024)throw new Error('O arquivo passa de 5 MB. Envie uma foto ou um PDF menor.');
+      const fd=new FormData();fd.append('id',id);fd.append('token',tk);fd.append('arquivo',arq,arq.name||'comprovante');
+      await api('/api/comprovante',{method:'POST',body:fd});
+      msg(m,'Comprovante enviado. O Julio confere e confirma sua reserva.','ok');inp.value='';carregarDia();
+    }catch(e){msg(m,e.message)}finally{b.disabled=false}};
+  return box;
+}
+
+async function salvar(){
+  const nome=$('fNome').value.trim(),tel=$('fTel').value.trim();
+  if(!sel)return;
+  if(!nome||soDig(tel).length<10){msg($('fMsg'),'Preencha o nome e o WhatsApp com DDD para reservar.');return}
+  const b=$('fSalvar');b.disabled=true;msg($('fMsg'),'');
+  try{
+    const r=await api('/api/reservar',{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({data:dataSel,posto:sel.posto,inicio:inicioSel(),horas:horasSel(),tipo,nome,tel})});
+    guardarMinha(r.id,r.token);
+    try{localStorage.setItem('cowork-prof',JSON.stringify({nome,tel}))}catch(e){}
+    const p=POSTOS.find(x=>x.id===sel.posto);
+    const txt='Reserva feita: '+nome+' · '+p.nome+' · '+fmt(dataSel)+' · '+rotulo(r.inicio)+' às '+rotulo(r.inicio+r.horas)+'. Valor '+brl(r.valor)+'. Ela fica garantida depois do pagamento antecipado.';
+    limpar();$('pDica').hidden=true;$('pTitulo').textContent='Reserva feita';
+    const d=$('det');d.hidden=false;d.innerHTML='';const a=document.createElement('div');a.className='aviso ok';a.textContent=txt;
+    d.append(a,caixaEnvio(r.id,r.token));
+    await carregarDia();
+  }catch(e){await carregarDia();msg($('fMsg'),e.message)}
+  finally{b.disabled=false}
+}
+
+async function verComprovante(id,alvo,botao){
+  botao.disabled=true;
+  try{const h={authorization:'Bearer '+senha};const r=await fetch('/api/dono/comprovante?id='+encodeURIComponent(id),{headers:h});
+    if(!r.ok)throw new Error('Comprovante não encontrado.');
+    const blob=await r.blob();if(ultimoComp)URL.revokeObjectURL(ultimoComp);ultimoComp=URL.createObjectURL(blob);
+    alvo.textContent='';
+    if(blob.type==='application/pdf'){const o=document.createElement('iframe');o.className='comp-pdf';o.src=ultimoComp;o.title='Comprovante em PDF';alvo.appendChild(o)}
+    else{const im=document.createElement('img');im.className='comp-view';im.src=ultimoComp;im.alt='Comprovante de pagamento';alvo.appendChild(im)}
+  }catch(e){alvo.textContent=e.message}finally{botao.disabled=false}
+}
+
+function abrirDetalhe(id){
+  const r=reservas.find(x=>x.id===id);if(!r)return;sel=null;$('form').hidden=true;$('pDica').hidden=true;
+  const p=POSTOS.find(x=>x.id===r.posto);
+  $('pTitulo').textContent=r.nome;
+  const d=$('det');d.hidden=false;d.innerHTML='';
+  const info=document.createElement('p');info.style.margin='0';
+  info.textContent=p.nome+' · '+fmt(dataSel)+' · '+rotulo(r.inicio)+' às '+rotulo(r.inicio+r.horas)+' ('+(r.tipo==='diaria'?'diária':r.horas+'h')+') · '+brl(r.valor)+(dono&&r.tel?' · WhatsApp '+r.tel:'');
+  const st=document.createElement('span');st.className='pill '+r.status;st.textContent=STATUS[r.status];
+  const ac=document.createElement('div');ac.className='acoes';ac.style.marginTop='12px';
+  d.append(info,st,ac);
+  if(dono){
+    const alvo=document.createElement('div');
+    if(r.comprovante){const bv=document.createElement('button');bv.className='btn sec';bv.type='button';bv.textContent='Ver comprovante';bv.onclick=()=>verComprovante(r.id,alvo,bv);ac.appendChild(bv)}
+    const pago=r.status==='pago';
+    const bp=document.createElement('button');bp.className='btn prim';bp.type='button';bp.textContent=pago?'Marcar como não pago':'Marcar como pago';
+    bp.onclick=async()=>{bp.disabled=true;try{await api('/api/dono/pago',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:r.id,pago:!pago})});await carregarDia();abrirDetalhe(r.id)}catch(e){bp.disabled=false;msg($('status'),e.message)}};
+    const bc=document.createElement('button');bc.className='btn perigo';bc.type='button';bc.textContent='Cancelar reserva';
+    bc.onclick=()=>{bc.hidden=true;const conf=document.createElement('button');conf.className='btn perigo';conf.type='button';conf.textContent='Confirmar cancelamento';
+      conf.onclick=async()=>{conf.disabled=true;try{await api('/api/dono/cancelar',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:r.id})});limpar();await carregarDia()}catch(e){conf.disabled=false;msg($('status'),e.message)}};ac.appendChild(conf)};
+    ac.append(bp,bc);
+    const bf=document.createElement('button');bf.className='btn sec';bf.type='button';bf.textContent='Fechar';bf.onclick=limpar;ac.appendChild(bf);
+    d.appendChild(alvo);
+  }else{
+    const tk=minhas()[r.id];
+    if(tk&&r.status!=='pago')d.appendChild(caixaEnvio(r.id,tk));
+    const t=document.createElement('p');t.style.cssText='margin:0;color:var(--muted)';t.textContent='Para cancelar ou mudar, fale com o Julio pelo WhatsApp (11) 99946-4365.';ac.appendChild(t);
+    const bf=document.createElement('button');bf.className='btn sec';bf.type='button';bf.textContent='Fechar';bf.onclick=limpar;ac.appendChild(bf);
+  }
+  renderGrade();
+}
+
+async function carregarDia(){
+  const pedido=dataSel;
+  try{const r=await api('/api/dia?data='+pedido);if(pedido!==dataSel)return;
+    reservas=r.reservas;precos=r.precos;dono=!!r.dono&&!!senha;msg($('status'),'');
+    if(sel){sel.max=livresDesde(sel.posto,sel.inicio);atualizaForm()}else renderGrade();
+    renderResumo();renderPrecos();
+  }catch(e){msg($('status'),e.message);renderGrade()}
+}
+
+function escolherDia(s){dataSel=s;reservas=[];limpar();renderDias();renderGrade();carregarDia()}
+
+async function entrarDono(){
+  if(dono){senha=null;dono=false;try{sessionStorage.removeItem('cowork-senha')}catch(e){};$('btnDono').textContent='Área do dono';$('donoBar').hidden=true;limpar();carregarDia();return}
+  const p=$('painel');limpar();$('pDica').hidden=true;$('pTitulo').textContent='Área do dono';
+  const d=$('det');d.hidden=false;d.innerHTML='<div class="campos"><label for="senhaDono">Senha<input id="senhaDono" type="password" autocomplete="current-password"></label></div>';
+  const ac=document.createElement('div');ac.className='acoes';ac.style.marginTop='12px';
+  const b=document.createElement('button');b.className='btn prim';b.type='button';b.textContent='Entrar';
+  const m=document.createElement('div');m.className='aviso';m.hidden=true;
+  ac.appendChild(b);d.append(ac,m);$('senhaDono').focus();
+  const ir=async()=>{const s=$('senhaDono').value;if(!s)return;b.disabled=true;
+    try{senha=s;await api('/api/dono/entrar',{method:'POST'});try{sessionStorage.setItem('cowork-senha',s)}catch(e){}
+      ligarDono();limpar();await carregarDia()}
+    catch(e){senha=null;msg(m,e.message)}finally{b.disabled=false}};
+  b.onclick=ir;$('senhaDono').onkeydown=e=>{if(e.key==='Enter')ir()};
+  p.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function ligarDono(){dono=true;$('btnDono').textContent='Sair da área do dono';msg($('donoBar'),'Você está na área do dono: toque numa reserva para ver o comprovante, marcar como paga ou cancelar.','ok')}
+
+$('tHora').onclick=()=>{tipo='hora';atualizaForm()};
+$('tDiaria').onclick=()=>{tipo='diaria';atualizaForm()};
+$('fHoras').onchange=atualizaForm;
+$('fSalvar').onclick=salvar;$('fCancelar').onclick=limpar;
+$('ant').onclick=()=>{if(semana>0){semana--;renderDias()}};
+$('prox').onclick=()=>{semana++;renderDias()};
+$('btnDono').onclick=entrarDono;
+try{const p=JSON.parse(localStorage.getItem('cowork-prof')||'null');if(p){$('fNome').value=p.nome||'';$('fTel').value=p.tel||''}}catch(e){}
+try{const s=sessionStorage.getItem('cowork-senha');if(s){senha=s;ligarDono()}}catch(e){}
+
+let d0=hoje();if(d0.getDay()===0)d0.setDate(d0.getDate()+1);
+dataSel=iso(d0);renderDias();renderGrade();carregarDia();
+timer=setInterval(()=>{if(!document.hidden)carregarDia()},30000);
+})();
+</script>
+</body>
+</html>
