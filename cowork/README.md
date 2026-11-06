@@ -1,6 +1,6 @@
 # Agenda do Cowork Kindo
 
-Reserva dos postos do cowork de cabeleireiro (2 cadeiras de cabeleireiro e 1 de manicure), no andar de cima da Perfumaria Kindo. Hora R$ 20 e diária das 9h às 18h por R$ 120 (valores alteráveis na área do dono).
+Reserva dos postos do cowork de cabeleireiro (2 cadeiras de cabeleireiro e 1 de manicure), no andar de cima da Perfumaria Kindo. Funciona de segunda a sábado, das 9h às 18h. Hora R$ 20 e diária das 9h às 18h por R$ 120 (valores alteráveis na área do dono).
 
 ## Projeto na Cloudflare Pages
 

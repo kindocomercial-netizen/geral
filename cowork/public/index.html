@@ -172,7 +172,7 @@ footer{color:var(--muted);font-size:13px;display:flex;justify-content:space-betw
 'use strict';
 const POSTOS=[{id:'cab1',nome:'Cabeleireiro 1'},{id:'cab2',nome:'Cabeleireiro 2'},{id:'mani',nome:'Manicure'}];
 const DS=['dom','seg','ter','qua','qui','sex','sáb'];
-const SLOTS=10, HORA_INI=9, DIA_H=9, TERMO='2026-11-06';
+const SLOTS=9, HORA_INI=9, DIA_H=9, TERMO='2026-11-06';
 const STATUS={pendente:'Aguardando pagamento',comprovante:'Comprovante enviado',pago:'Pago'};
 let precos={hora:20,diaria:120};
 let senha=null, dono=false;
@@ -423,8 +423,8 @@ $('btnDono').onclick=entrarDono;
 try{const p=JSON.parse(localStorage.getItem('cowork-prof')||'null');if(p){$('fNome').value=p.nome||'';$('fTel').value=p.tel||''}}catch(e){}
 try{const s=sessionStorage.getItem('cowork-senha');if(s){senha=s;ligarDono()}}catch(e){}
 
-// Depois das 18h já não há horário no dia: abre no próximo dia aberto.
-let d0=hoje();if(new Date().getHours()>=18)d0.setDate(d0.getDate()+1);if(d0.getDay()===0)d0.setDate(d0.getDate()+1);
+// Depois das 17h já não há horário no dia (o último vai das 17h às 18h): abre no próximo dia aberto.
+let d0=hoje();if(new Date().getHours()>=17)d0.setDate(d0.getDate()+1);if(d0.getDay()===0)d0.setDate(d0.getDate()+1);
 dataSel=iso(d0);renderDias();renderGrade();carregarDia();
 timer=setInterval(()=>{if(!document.hidden)carregarDia()},30000);
 })();

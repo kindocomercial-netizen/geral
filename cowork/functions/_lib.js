@@ -6,7 +6,7 @@
 
 export const PADRAO = { hora: 20, diaria: 120 };
 export const POSTOS = ['cab1', 'cab2', 'mani'];
-export const SLOTS = 10;          // 9h às 19h, de hora em hora
+export const SLOTS = 9;           // 9h às 18h, de hora em hora (último horário: 17h às 18h)
 export const HORA_INI = 9;        // primeiro horário
 export const DIARIA = { inicio: 0, horas: 9 }; // 9h às 18h
 export const MAX_ARQUIVO = 5 * 1024 * 1024;
