@@ -55,6 +55,8 @@ tbody th{font-variant-numeric:tabular-nums;font-weight:700;width:76px;color:var(
 tr:last-child th,tr:last-child td{border-bottom:none}
 .slot{width:100%;min-height:48px;border-radius:12px;border:1.5px dashed var(--line);background:transparent;color:var(--muted);font-family:var(--sans);font-weight:600;cursor:pointer;text-align:left;padding:6px 10px}
 .slot:hover{border-color:var(--rosa);color:var(--rosa)}
+.slot.livre{border:1.5px solid var(--ok);background:var(--ok-bg);color:var(--ok);font-weight:700}
+.slot.livre:hover{border-color:var(--ok);color:var(--ok);filter:brightness(.96)}
 .slot.sel{border-style:solid;border-color:var(--rosa);background:var(--surface);color:var(--fg)}
 .slot.ocup{border:none;background:var(--busy);color:var(--fg)}
 .slot.ocup .n{font-weight:700;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -233,7 +235,7 @@ function renderGrade(){
         b.setAttribute('aria-label',rotulo(i)+' '+p.nome+': reservado por '+r.nome);
         b.onclick=()=>abrirDetalhe(r.id)}
       else{b.textContent=passou(i)?'Já passou':'Livre';
-        if(passou(i)){b.classList.add('passado');b.disabled=true}
+        if(passou(i)){b.classList.add('passado');b.disabled=true}else b.classList.add('livre');
         if(sel&&sel.posto===p.id&&i>=inicioSel()&&i<inicioSel()+horasSel())b.classList.add('sel');
         b.setAttribute('aria-label',rotulo(i)+' '+p.nome+': livre');
         b.onclick=()=>escolherSlot(p.id,i)}
