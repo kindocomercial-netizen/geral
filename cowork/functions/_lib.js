@@ -10,6 +10,7 @@ export const SLOTS = 10;          // 9h às 19h, de hora em hora
 export const HORA_INI = 9;        // primeiro horário
 export const DIARIA = { inicio: 0, horas: 9 }; // 9h às 18h
 export const MAX_ARQUIVO = 5 * 1024 * 1024;
+export const TERMO_VERSAO = '2026-11-06'; // versão em public/termo.html
 
 let schemaPronto = false;
 export async function garantirSchema(db) {
@@ -26,6 +27,10 @@ export async function garantirSchema(db) {
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_res_tel ON reservas(teld)`),
     db.prepare(`CREATE TABLE IF NOT EXISTS config (chave TEXT PRIMARY KEY, valor TEXT NOT NULL)`),
   ]);
+  // Colunas do aceite do termo (adicionadas depois; ignora se já existem).
+  for (const col of ['aceite_termo TEXT', 'aceite_em TEXT']) {
+    try { await db.prepare('ALTER TABLE reservas ADD COLUMN ' + col).run(); } catch (e) { /* já existe */ }
+  }
   schemaPronto = true;
 }
 

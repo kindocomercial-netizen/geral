@@ -8,11 +8,11 @@ export async function onRequestGet({ request, env }) {
   if (!dataValida(data)) return erro('Data inválida.');
   const dono = ehDono(request, env);
   const { results } = await env.DB.prepare(
-    'SELECT id, posto, inicio, horas, tipo, nome, tel, valor, status, comprovante FROM reservas WHERE data = ? AND cancelado = 0 ORDER BY inicio'
+    'SELECT id, posto, inicio, horas, tipo, nome, tel, valor, status, comprovante, aceite_em FROM reservas WHERE data = ? AND cancelado = 0 ORDER BY inicio'
   ).bind(data).all();
   const reservas = results.map((r) => {
     const base = { id: r.id, posto: r.posto, inicio: r.inicio, horas: r.horas, tipo: r.tipo, nome: r.nome, status: r.status, valor: r.valor };
-    if (dono) Object.assign(base, { tel: r.tel, comprovante: !!r.comprovante });
+    if (dono) Object.assign(base, { tel: r.tel, comprovante: !!r.comprovante, aceiteEm: r.aceite_em || null });
     return base;
   });
   return json({ data, precos: await lerPrecos(env.DB), reservas, dono });

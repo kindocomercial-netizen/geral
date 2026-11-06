@@ -85,6 +85,9 @@ input[type=file]{padding:8px}
 .total{font-size:22px;font-weight:800;color:var(--rosa);font-variant-numeric:tabular-nums}
 .regras{color:var(--muted);font-size:13px;margin:0;padding-left:18px}
 .vazio{color:var(--muted);text-align:center;padding:24px}
+.aceite{flex-direction:row;align-items:flex-start;gap:10px;font-size:15px;color:var(--fg);font-weight:600;background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer}
+.aceite input{width:22px;height:22px;min-height:0;margin:1px 0 0;flex:0 0 auto;accent-color:var(--rosa)}
+.aceite a{color:var(--ameixa)}
 .envio{background:var(--bg);border:1.5px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
 .envio h3{margin:0;font-size:16px}
 .comp-view{max-width:100%;border-radius:12px;border:1.5px solid var(--line)}
@@ -137,6 +140,7 @@ footer{color:var(--muted);font-size:13px;display:flex;justify-content:space-betw
           <label for="fNome">Nome do profissional<input id="fNome" autocomplete="name" placeholder="Seu nome"></label>
           <label for="fTel">WhatsApp<input id="fTel" inputmode="tel" autocomplete="tel" placeholder="(11) 90000-0000"></label>
         </div>
+        <label class="aceite" for="fAceite"><input id="fAceite" type="checkbox"> <span>Li e concordo com o <a href="termo.html" target="_blank" rel="noopener">Termo de Uso do Espaço</a>.</span></label>
         <div class="acoes">
           <span class="total" id="fTotal">R$ 20</span>
           <button class="btn prim" id="fSalvar" type="button">Reservar</button>
@@ -165,7 +169,7 @@ footer{color:var(--muted);font-size:13px;display:flex;justify-content:space-betw
 'use strict';
 const POSTOS=[{id:'cab1',nome:'Cabeleireiro 1'},{id:'cab2',nome:'Cabeleireiro 2'},{id:'mani',nome:'Manicure'}];
 const DS=['dom','seg','ter','qua','qui','sex','sáb'];
-const SLOTS=10, HORA_INI=9, DIA_H=9;
+const SLOTS=10, HORA_INI=9, DIA_H=9, TERMO='2026-11-06';
 const STATUS={pendente:'Aguardando pagamento',comprovante:'Comprovante enviado',pago:'Pago'};
 let precos={hora:20,diaria:120};
 let senha=null, dono=false;
@@ -316,10 +320,11 @@ async function salvar(){
   const nome=$('fNome').value.trim(),tel=$('fTel').value.trim();
   if(!sel)return;
   if(!nome||soDig(tel).length<10){msg($('fMsg'),'Preencha o nome e o WhatsApp com DDD para reservar.');return}
+  if(!$('fAceite').checked){msg($('fMsg'),'Para reservar, marque que leu e concorda com o Termo de Uso do Espaço.');return}
   const b=$('fSalvar');b.disabled=true;msg($('fMsg'),'');
   try{
     const r=await api('/api/reservar',{method:'POST',headers:{'content-type':'application/json'},
-      body:JSON.stringify({data:dataSel,posto:sel.posto,inicio:inicioSel(),horas:horasSel(),tipo,nome,tel})});
+      body:JSON.stringify({data:dataSel,posto:sel.posto,inicio:inicioSel(),horas:horasSel(),tipo,nome,tel,aceiteTermo:TERMO})});
     guardarMinha(r.id,r.token);
     try{localStorage.setItem('cowork-prof',JSON.stringify({nome,tel}))}catch(e){}
     const p=POSTOS.find(x=>x.id===sel.posto);
@@ -352,7 +357,10 @@ function abrirDetalhe(id){
   info.textContent=p.nome+' · '+fmt(dataSel)+' · '+rotulo(r.inicio)+' às '+rotulo(r.inicio+r.horas)+' ('+(r.tipo==='diaria'?'diária':r.horas+'h')+') · '+brl(r.valor)+(dono&&r.tel?' · WhatsApp '+r.tel:'');
   const st=document.createElement('span');st.className='pill '+r.status;st.textContent=STATUS[r.status];
   const ac=document.createElement('div');ac.className='acoes';ac.style.marginTop='12px';
-  d.append(info,st,ac);
+  d.append(info,st);
+  if(dono){const t=document.createElement('p');t.style.cssText='margin:6px 0 0;color:var(--muted);font-size:13px';
+    t.textContent=r.aceiteEm?'Termo de uso aceito em '+new Date(r.aceiteEm).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'}):'Sem registro de aceite do termo';d.appendChild(t)}
+  d.appendChild(ac);
   if(dono){
     const alvo=document.createElement('div');
     if(r.comprovante){const bv=document.createElement('button');bv.className='btn sec';bv.type='button';bv.textContent='Ver comprovante';bv.onclick=()=>verComprovante(r.id,alvo,bv);ac.appendChild(bv)}

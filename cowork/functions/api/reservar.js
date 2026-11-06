@@ -1,6 +1,6 @@
 import {
   json, erro, dataValida, slotsDe, lerPrecos, soDigitos, POSTOS, DIARIA,
-  agoraSP, marca, token, ehDono,
+  agoraSP, marca, token, ehDono, TERMO_VERSAO,
 } from '../_lib.js';
 
 // POST /api/reservar  {data, posto, inicio, horas, tipo, nome, tel}
@@ -18,6 +18,7 @@ export async function onRequestPost({ request, env }) {
   if (!POSTOS.includes(posto)) return erro('Posto inválido.');
   if (!nome) return erro('Informe o nome do profissional.');
   if (teld.length < 10) return erro('Informe o WhatsApp com DDD.');
+  if (b.aceiteTermo !== TERMO_VERSAO) return erro('Para reservar, marque que leu e concorda com o Termo de Uso do Espaço.');
 
   const total = slotsDe(data);
   if (!total) return erro('Aos domingos a loja fica fechada.');
@@ -57,9 +58,9 @@ export async function onRequestPost({ request, env }) {
   const tk = token();
 
   await env.DB.prepare(
-    `INSERT INTO reservas (id, data, posto, inicio, horas, tipo, nome, tel, teld, valor, status, token, criado)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente', ?, ?)`
-  ).bind(id, data, posto, inicio, horas, tipo, nome, tel, teld, valor, tk, new Date().toISOString()).run();
+    `INSERT INTO reservas (id, data, posto, inicio, horas, tipo, nome, tel, teld, valor, status, token, criado, aceite_termo, aceite_em)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente', ?, ?, ?, ?)`
+  ).bind(id, data, posto, inicio, horas, tipo, nome, tel, teld, valor, tk, new Date().toISOString(), TERMO_VERSAO, new Date().toISOString()).run();
 
   // Conferência final contra reserva simultânea: se colidiu, desfaz a mais nova.
   const { results: depois } = await env.DB.prepare(
