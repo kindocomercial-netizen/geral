@@ -138,7 +138,8 @@ footer{color:var(--muted);font-size:13px;display:flex;justify-content:space-betw
           <button class="tipo" id="tDiaria" aria-pressed="false" type="button">Diária (9h às 18h)</button>
         </div>
         <div class="campos">
-          <label for="fHoras">Quantas horas<select id="fHoras"></select></label>
+          <label for="fHoras" id="lHoras">Quantas horas<select id="fHoras"></select></label>
+          <label for="fDiariaTxt" id="lDiaria" hidden>Período<input id="fDiariaTxt" value="Diária · das 9h às 18h" readonly></label>
           <label for="fNome">Nome do profissional<input id="fNome" autocomplete="name" placeholder="Seu nome"></label>
           <label for="fTel">WhatsApp<input id="fTel" inputmode="tel" autocomplete="tel" placeholder="(11) 90000-0000"></label>
         </div>
@@ -273,7 +274,7 @@ function editarPrecos(){
 
 function atualizaForm(){
   $('tHora').setAttribute('aria-pressed',String(tipo==='hora'));$('tDiaria').setAttribute('aria-pressed',String(tipo==='diaria'));
-  $('fHoras').disabled=tipo==='diaria';
+  $('lHoras').hidden=tipo==='diaria';$('lDiaria').hidden=tipo!=='diaria';
   $('fTotal').textContent=brl(valorSel());
   if(sel){const p=POSTOS.find(x=>x.id===sel.posto);$('pTitulo').textContent=p.nome+' · '+fmt(dataSel)+' · '+rotulo(inicioSel())+' às '+rotulo(inicioSel()+horasSel())}
   const bloq=tipo==='diaria'&&!diariaLivre();$('fSalvar').disabled=bloq;
