@@ -18,3 +18,5 @@ Reserva dos postos do cowork de cabeleireiro (2 cadeiras de cabeleireiro e 1 de 
 | `ADMIN_SENHA` | Variável (Secreta)      | Senha da área do dono           |
 
 As tabelas são criadas sozinhas no primeiro acesso.
+
+Publicado em kindo-cowork.pages.dev.
