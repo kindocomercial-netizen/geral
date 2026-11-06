@@ -232,7 +232,7 @@ function renderGrade(){
         b.querySelector('.n').textContent=first?(r.nome+(r.tipo==='diaria'?' · diária':'')):'↳ '+r.nome;
         b.setAttribute('aria-label',rotulo(i)+' '+p.nome+': reservado por '+r.nome);
         b.onclick=()=>abrirDetalhe(r.id)}
-      else{b.textContent=passou(i)?'—':'Livre';
+      else{b.textContent=passou(i)?'Já passou':'Livre';
         if(passou(i)){b.classList.add('passado');b.disabled=true}
         if(sel&&sel.posto===p.id&&i>=inicioSel()&&i<inicioSel()+horasSel())b.classList.add('sel');
         b.setAttribute('aria-label',rotulo(i)+' '+p.nome+': livre');
@@ -420,7 +420,8 @@ $('btnDono').onclick=entrarDono;
 try{const p=JSON.parse(localStorage.getItem('cowork-prof')||'null');if(p){$('fNome').value=p.nome||'';$('fTel').value=p.tel||''}}catch(e){}
 try{const s=sessionStorage.getItem('cowork-senha');if(s){senha=s;ligarDono()}}catch(e){}
 
-let d0=hoje();if(d0.getDay()===0)d0.setDate(d0.getDate()+1);
+// Depois das 18h já não há horário no dia: abre no próximo dia aberto.
+let d0=hoje();if(new Date().getHours()>=18)d0.setDate(d0.getDate()+1);if(d0.getDay()===0)d0.setDate(d0.getDate()+1);
 dataSel=iso(d0);renderDias();renderGrade();carregarDia();
 timer=setInterval(()=>{if(!document.hidden)carregarDia()},30000);
 })();
