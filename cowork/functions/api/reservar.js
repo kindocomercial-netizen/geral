@@ -32,19 +32,6 @@ export async function onRequestPost({ request, env }) {
   }
   if (marca(data, inicio) < agoraSP()) return erro('Esse horário já passou.');
 
-  // Uso anterior sem pagamento bloqueia nova reserva (cláusula 3.5 do contrato).
-  if (!dono) {
-    const { results: abertas } = await env.DB.prepare(
-      "SELECT data, inicio, horas, valor FROM reservas WHERE teld = ? AND cancelado = 0 AND status != 'pago'"
-    ).bind(teld).all();
-    const agora = agoraSP();
-    const divida = abertas.find((r) => marca(r.data, r.inicio + r.horas) <= agora);
-    if (divida) {
-      const [y, m, d] = divida.data.split('-');
-      return erro(`Há um uso de ${d}/${m} em aberto (R$ ${divida.valor}). Quite esse valor com o Julio para reservar de novo.`, 409);
-    }
-  }
-
   // Conflito com reservas existentes no mesmo posto e dia.
   const { results: ocupadas } = await env.DB.prepare(
     'SELECT inicio, horas FROM reservas WHERE data = ? AND posto = ? AND cancelado = 0'
