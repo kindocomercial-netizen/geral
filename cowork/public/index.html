@@ -66,6 +66,11 @@ tr:last-child th,tr:last-child td{border-bottom:none}
 .pill.pago{background:var(--ok-bg);color:var(--ok)}
 .pill.pendente{background:var(--warn-bg);color:var(--warn)}
 .pill.comprovante{background:var(--info-bg);color:var(--info)}
+.pill.parceria{background:var(--surface);color:var(--ameixa);border:1px solid var(--ameixa)}
+.barra-dono{display:flex;justify-content:flex-end}
+.dsem{display:flex;flex-wrap:wrap;gap:8px}
+.dsem label{flex-direction:row;align-items:center;gap:6px;color:var(--fg);font-size:15px;background:var(--bg);border:1.5px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer}
+.dsem input{width:18px;height:18px;min-height:0;margin:0;accent-color:var(--ameixa)}
 .painel{background:var(--surface);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:14px}
 .painel h2{font-family:var(--display);font-weight:400;font-size:26px;margin:0;color:var(--ameixa);text-wrap:balance}
 .campos{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
@@ -126,6 +131,8 @@ footer{color:var(--muted);font-size:13px;display:flex;justify-content:space-betw
     <button class="nav" id="prox" type="button" aria-label="Próxima semana">›</button>
   </div>
 
+  <div class="barra-dono"><button class="btn sec" id="btnParceria" type="button">Reservar cadeira 70/30 (com senha)</button></div>
+
   <div class="resumo" id="resumo" hidden></div>
   <div id="status" class="aviso erro" hidden></div>
 
@@ -178,7 +185,7 @@ footer{color:var(--muted);font-size:13px;display:flex;justify-content:space-betw
 const POSTOS=[{id:'cab1',nome:'Cabeleireiro 1'},{id:'cab2',nome:'Cabeleireiro 2'},{id:'mani',nome:'Manicure'}];
 const DS=['dom','seg','ter','qua','qui','sex','sáb'];
 const SLOTS=9, HORA_INI=9, DIA_H=9, TERMO='2026-11-06';
-const STATUS={pendente:'Aguardando pagamento',comprovante:'Comprovante enviado',pago:'Pago'};
+const STATUS={pendente:'Aguardando pagamento',comprovante:'Comprovante enviado',pago:'Pago',parceria:'Parceria 70/30'};
 let precos={hora:20,diaria:120};
 let senha=null, dono=false;
 let semana=0, dataSel=null, reservas=[], sel=null, tipo='hora', timer=null, ultimoComp=null;
@@ -237,7 +244,7 @@ function renderGrade(){
       const r=oc[p.id+'@'+i];
       if(r){b.classList.add('ocup');const first=r.inicio===i;
         b.innerHTML='<span class="n"></span>'+(first?'<span class="pill '+r.status+'">'+STATUS[r.status]+'</span>':'');
-        b.querySelector('.n').textContent=first?(r.nome+(r.tipo==='diaria'?' · diária':'')):'↳ '+r.nome;
+        b.querySelector('.n').textContent=first?(r.nome+(r.tipo==='diaria'?' · diária':r.tipo==='parceria'?' · 70/30':'')):'↳ '+r.nome;
         b.setAttribute('aria-label',rotulo(i)+' '+p.nome+': reservado por '+r.nome);
         b.onclick=()=>abrirDetalhe(r.id)}
       else{b.textContent=passou(i)?'Já passou':'Livre';
@@ -377,7 +384,7 @@ function abrirDetalhe(id){
   $('pTitulo').textContent=r.nome;
   const d=$('det');d.hidden=false;d.innerHTML='';
   const info=document.createElement('p');info.style.margin='0';
-  info.textContent=p.nome+' · '+fmt(dataSel)+' · '+rotulo(r.inicio)+' às '+rotulo(r.inicio+r.horas)+' ('+(r.tipo==='diaria'?'diária':r.horas+'h')+') · '+brl(r.valor)+(dono&&r.tel?' · WhatsApp '+r.tel:'');
+  info.textContent=p.nome+' · '+fmt(dataSel)+' · '+rotulo(r.inicio)+' às '+rotulo(r.inicio+r.horas)+' ('+(r.tipo==='diaria'?'diária':r.tipo==='parceria'?'dia todo, parceria 70/30':r.horas+'h')+')'+(r.tipo==='parceria'?'':' · '+brl(r.valor))+(dono&&r.tel?' · WhatsApp '+r.tel:'');
   const st=document.createElement('span');st.className='pill '+r.status;st.textContent=STATUS[r.status];
   const ac=document.createElement('div');ac.className='acoes';ac.style.marginTop='12px';
   d.append(info,st);
@@ -393,12 +400,12 @@ function abrirDetalhe(id){
     const bc=document.createElement('button');bc.className='btn perigo';bc.type='button';bc.textContent='Cancelar reserva';
     bc.onclick=()=>{bc.hidden=true;const conf=document.createElement('button');conf.className='btn perigo';conf.type='button';conf.textContent='Confirmar cancelamento';
       conf.onclick=async()=>{conf.disabled=true;try{await api('/api/dono/cancelar',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:r.id})});limpar();await carregarDia()}catch(e){conf.disabled=false;msg($('status'),e.message)}};ac.appendChild(conf)};
-    ac.append(bp,bc);
+    if(r.tipo==='parceria')ac.append(bc);else ac.append(bp,bc);
     const bf=document.createElement('button');bf.className='btn sec';bf.type='button';bf.textContent='Fechar';bf.onclick=limpar;ac.appendChild(bf);
     d.appendChild(alvo);
   }else{
     const tk=minhas()[r.id];
-    if(tk&&r.status!=='pago')d.appendChild(caixaEnvio(r.id,tk));
+    if(tk&&r.status!=='pago'&&r.tipo!=='parceria')d.appendChild(caixaEnvio(r.id,tk));
     const t=document.createElement('p');t.style.cssText='margin:0;color:var(--muted)';t.textContent='Para cancelar ou mudar, fale com o Julio pelo WhatsApp (11) 99946-4365.';ac.appendChild(t);
     const bf=document.createElement('button');bf.className='btn sec';bf.type='button';bf.textContent='Fechar';bf.onclick=limpar;ac.appendChild(bf);
   }
@@ -416,8 +423,8 @@ async function carregarDia(){
 
 function escolherDia(s){dataSel=s;reservas=[];limpar();renderDias();renderGrade();carregarDia()}
 
-async function entrarDono(){
-  if(dono){senha=null;dono=false;try{sessionStorage.removeItem('cowork-senha')}catch(e){};$('btnDono').textContent='Área do dono';$('donoBar').hidden=true;limpar();carregarDia();return}
+async function entrarDono(depois){
+  if(dono&&!depois){senha=null;dono=false;try{sessionStorage.removeItem('cowork-senha')}catch(e){};$('btnDono').textContent='Área do dono';$('donoBar').hidden=true;limpar();carregarDia();return}
   const p=$('painel');limpar();$('pDica').hidden=true;$('pTitulo').textContent='Área do dono';
   const d=$('det');d.hidden=false;d.innerHTML='<div class="campos"><label for="senhaDono">Senha<input id="senhaDono" type="password" autocomplete="current-password"></label></div>';
   const ac=document.createElement('div');ac.className='acoes';ac.style.marginTop='12px';
@@ -426,7 +433,7 @@ async function entrarDono(){
   ac.appendChild(b);d.append(ac,m);$('senhaDono').focus();
   const ir=async()=>{const s=$('senhaDono').value;if(!s)return;b.disabled=true;
     try{senha=s;await api('/api/dono/entrar',{method:'POST'});try{sessionStorage.setItem('cowork-senha',s)}catch(e){}
-      ligarDono();limpar();await carregarDia()}
+      ligarDono();limpar();await carregarDia();if(depois)depois()}
     catch(e){senha=null;msg(m,e.message)}finally{b.disabled=false}};
   b.onclick=ir;$('senhaDono').onkeydown=e=>{if(e.key==='Enter')ir()};
   p.scrollIntoView({behavior:'smooth',block:'start'});
@@ -439,7 +446,50 @@ $('fHoras').onchange=atualizaForm;
 $('fSalvar').onclick=salvar;$('fCancelar').onclick=limpar;
 $('ant').onclick=()=>{if(semana>0){semana--;renderDias()}};
 $('prox').onclick=()=>{semana++;renderDias()};
-$('btnDono').onclick=entrarDono;
+$('btnDono').onclick=()=>entrarDono();
+$('btnParceria').onclick=()=>{if(dono)abrirParceria();else entrarDono(abrirParceria)};
+
+// Reserva de cadeira o dia todo para profissional no esquema 70/30 (só o dono).
+function abrirParceria(){
+  limpar();$('pDica').hidden=true;$('pTitulo').textContent='Reservar cadeira 70/30';
+  const d=$('det');d.hidden=false;d.innerHTML='';
+  const intro=document.createElement('p');intro.style.cssText='margin:0 0 12px;color:var(--muted)';
+  intro.textContent='Reserva a cadeira o dia todo (9h às 18h) para o profissional parceiro, sem cobrança de aluguel. Dias já ocupados e domingos são pulados.';
+  const f=document.createElement('div');f.style.cssText='display:flex;flex-direction:column;gap:14px';
+  f.innerHTML='<div class="campos">'+
+    '<label for="pcPosto">Cadeira<select id="pcPosto"></select></label>'+
+    '<label for="pcNome">Profissional<input id="pcNome" placeholder="Nome do profissional"></label>'+
+    '<label for="pcTel">WhatsApp (opcional)<input id="pcTel" inputmode="tel" placeholder="(11) 90000-0000"></label>'+
+    '<label for="pcIni">De<input id="pcIni" type="date"></label>'+
+    '<label for="pcFim">Até<input id="pcFim" type="date"></label></div>'+
+    '<div><span style="font-weight:600;font-size:13px;color:var(--muted)">Dias da semana</span><div class="dsem" id="pcDias"></div></div>';
+  d.append(intro,f);
+  POSTOS.forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=p.nome;$('pcPosto').appendChild(o)});
+  ['seg','ter','qua','qui','sex','sáb'].forEach((n,i)=>{const l=document.createElement('label');l.innerHTML='<input type="checkbox" checked value="'+(i+1)+'"> '+n;$('pcDias').appendChild(l)});
+  $('pcIni').value=dataSel;$('pcFim').value=dataSel;
+  const ac=document.createElement('div');ac.className='acoes';
+  const b=document.createElement('button');b.className='btn prim';b.type='button';b.textContent='Reservar dias';
+  const bf=document.createElement('button');bf.className='btn sec';bf.type='button';bf.textContent='Fechar';bf.onclick=limpar;
+  const m=document.createElement('div');m.className='aviso';m.hidden=true;
+  ac.append(b,bf);f.append(ac,m);
+  b.onclick=async()=>{
+    const nome=$('pcNome').value.trim(),ini=$('pcIni').value,fim=$('pcFim').value;
+    const dsem=[...$('pcDias').querySelectorAll('input:checked')].map(x=>Number(x.value));
+    if(!nome){msg(m,'Informe o nome do profissional.');return}
+    if(!ini||!fim||fim<ini){msg(m,'Confira as datas: "Até" precisa ser igual ou depois de "De".');return}
+    const datas=[];const c=parse(ini),e=parse(fim);
+    for(;c<=e&&datas.length<=120;c.setDate(c.getDate()+1))if(dsem.includes(c.getDay()))datas.push(iso(c));
+    if(!datas.length){msg(m,'Nenhum dia no período com os dias da semana marcados.');return}
+    if(datas.length>120){msg(m,'Escolha no máximo 120 dias por vez.');return}
+    b.disabled=true;msg(m,'Reservando…','ok');
+    try{const r=await api('/api/dono/parceria',{method:'POST',headers:{'content-type':'application/json'},
+        body:JSON.stringify({posto:$('pcPosto').value,nome,tel:$('pcTel').value.trim(),datas})});
+      let t=r.feitas.length+(r.feitas.length===1?' dia reservado':' dias reservados')+' para '+nome+'.';
+      if(r.puladas.length)t+=' Não reservados: '+r.puladas.map(x=>fmt(x.data)+' ('+x.motivo+')').join('; ')+'.';
+      msg(m,t,r.feitas.length?'ok':'erro');await carregarDia();
+    }catch(e2){msg(m,e2.message)}finally{b.disabled=false}};
+  $('painel').scrollIntoView({behavior:'smooth',block:'start'});
+}
 try{const p=JSON.parse(localStorage.getItem('cowork-prof')||'null');if(p){$('fNome').value=p.nome||'';$('fTel').value=p.tel||''}}catch(e){}
 try{const s=sessionStorage.getItem('cowork-senha');if(s){senha=s;ligarDono()}}catch(e){}
 
